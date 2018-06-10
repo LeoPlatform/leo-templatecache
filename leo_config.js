@@ -35,7 +35,9 @@ module.exports = {
 	},
 	dev: {
 		resources: {
-			Templates: 'devLeoTemplateCache-Templates-19JWMAJ9WN4PP',
+			Templates: 'devLeoTemplateCache-Templates-R8ZA5K903VCC',
+			TemplateVersions: 'devLeoTemplateCache-TemplateVersions-3D01R5P9LF3H',
+			Versions: 'devLeoTemplateCache-Versions-DUX73NQY4LWP'
 		},
 		leoaws: leoaws({
 			profile: 'default',

@@ -2,10 +2,7 @@
 module.exports = {
 	httpMethod: "GET",
 	headers: {},
-	queryStringParameters: {
-		something: 'awesome'
-	},
 	pathParameters: {
-		id: "steve"
+		id: "menu/product/US.json"
 	}
 };
