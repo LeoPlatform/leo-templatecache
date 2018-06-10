@@ -3,6 +3,8 @@ var request = require("leo-auth");
 var config = require("leo-config");
 const union = require("lodash.union");
 var querystring = require("querystring");
+const crypto = require("crypto");
+const zlib = require("zlib");
 
 const defaults = {
 	locale: 'en-US',
@@ -27,11 +29,14 @@ const options = {
 		'presenter'
 	]
 };
-let authFallbacks = {
-	'customer': 'anonymous',
-	'presenter': 'customer'
+let fallbacks = {
+	auth: {
+		'customer': 'anonymous',
+		'presenter': 'customer'
+	},
+	locale: {}
 }
-let languageFallbacks = {};
+
 let firstLanguage = {};
 options.locale.forEach(locale => {
 	//There is no fallback for en-US other than a 404?
@@ -39,10 +44,10 @@ options.locale.forEach(locale => {
 
 	let [language, market] = locale.split(/-/);
 	if (!(language in firstLanguage)) {
-		languageFallbacks[locale] = "en-US";
+		fallbacks.locale[locale] = "en-US";
 		firstLanguage[language] = locale;
 	} else {
-		languageFallbacks[locale] = firstLanguage[language];
+		fallbacks.locale[locale] = firstLanguage[language];
 	}
 });
 const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
@@ -54,20 +59,18 @@ let variations = cartesian.apply(cartesian, optionsOrder.map(e => options[e])).m
 	};
 });
 
-console.log(languageFallbacks);
-console.log(authFallbacks);
-console.log(variations);
+console.log(fallbacks.locale);
+console.log(fallbacks.auth);
+// console.log(variations);
 
 function createOptionString(params) {
 	let o = Object.assign({}, defaults, params);
-	return Object.keys(o).sort((a, b) => {
+	return querystring.stringify(Object.keys(o).sort((a, b) => {
 		return optionsOrder.indexOf(a) - optionsOrder.indexOf(b);
-	}).filter(k => {
-		return true;
 	}).reduce((d, k) => {
 		d[k] = o[k];
 		return d;
-	}, {});
+	}, {}));
 }
 
 exports.handler = async function (event, context, callback) {
@@ -134,13 +137,53 @@ exports.handler = async function (event, context, callback) {
 			id: pageId
 		});
 
-		console.log("OPTION STRING", createOptionString({
-			auth: 'anonymous',
-			locale: 'en-US'
-		}));
+		let fileContents = {};
+		let fileMap = Object.keys(template.files).reduce((a, key, i) => {
+			let h = crypto.createHash('md5').update(key).digest('hex');
+			a[createOptionString(querystring.parse(key))] = h;
+			fileContents[h] = template.files[key];
+			return a;
+		}, {});
 
-		console.timeEnd("done");
-		callback(null, template);
+		let gzip = zlib.createGzip();
+
+		template.files = fileContents;
+
+		let filemaps = {};
+		variations.forEach(v => {
+			let q = createOptionString(v);
+			if (q in fileMap) {
+				filemaps[q] = fileMap[q];
+				return;
+			} else {
+				let tryVariations = cartesian.apply(cartesian, optionsOrder.map(e => {
+					let t = v[e];
+					let f = [t];
+					while (fallbacks[e][t]) {
+						t = fallbacks[e][t];
+						f.push(t);
+					}
+					return f;
+				})).map(e => {
+					return {
+						locale: e[0],
+						auth: e[1]
+					};
+				});
+				for (var i = 0; i < tryVariations.length; i++) {
+					let q2 = createOptionString(tryVariations[i]);
+					if (q2 in fileMap) {
+						filemaps[q] = fileMap[q2];
+						return;
+					}
+				}
+			}
+		});
+
+		zlib.gzip(JSON.stringify(fileContents), (err, buf) => {
+			template.files = buf.toString("base64");
+			callback(null, template);
+		});
 	} else if (event.httpMethod == "POST") {
 		let compiled = {};
 
