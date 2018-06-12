@@ -3,6 +3,6 @@ module.exports = {
 	httpMethod: "GET",
 	headers: {},
 	pathParameters: {
-		id: "menu/product/US.json"
+		id: "templates/site_wrapper"
 	}
 };

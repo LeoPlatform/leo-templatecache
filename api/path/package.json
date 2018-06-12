@@ -14,7 +14,7 @@
 			"type": "resource",
 			"uri": [
 				"POST:/api/template",
-				"GET:/api/template/{version}/{id+}"
+				"GET:/api/template/{id+}"
 			],
 			"handler": "handler",
 			"role": null,

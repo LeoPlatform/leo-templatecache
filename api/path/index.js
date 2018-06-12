@@ -7,21 +7,21 @@ const crypto = require("crypto");
 const zlib = require("zlib");
 
 const defaults = {
-	locale: 'en-US',
+	locale: 'en_US',
 	auth: 'anonymous'
 };
 
 const optionsOrder = ['locale', 'auth'];
 const options = {
 	locale: [
-		'en-US',
-		'es-ES',
-		'es-MX',
-		'en-GB',
-		'fr-FR',
-		'en-CA',
-		'fr-CA',
-		'it-IT'
+		'en_US',
+		'es_ES',
+		'es_MX',
+		'en_GB',
+		'fr_FR',
+		'en_CA',
+		'fr_CA',
+		'it_IT'
 	],
 	auth: [
 		'anonymous',
@@ -39,12 +39,12 @@ let fallbacks = {
 
 let firstLanguage = {};
 options.locale.forEach(locale => {
-	//There is no fallback for en-US other than a 404?
-	if (locale == 'en-US') return;
+	//There is no fallback for en_US other than a 404?
+	if (locale == 'en_US') return;
 
-	let [language, market] = locale.split(/-/);
+	let [language, market] = locale.split(/\_/);
 	if (!(language in firstLanguage)) {
-		fallbacks.locale[locale] = "en-US";
+		fallbacks.locale[locale] = "en_US";
 		firstLanguage[language] = locale;
 	} else {
 		fallbacks.locale[locale] = firstLanguage[language];
@@ -52,15 +52,28 @@ options.locale.forEach(locale => {
 });
 const f = (a, b) => [].concat(...a.map(d => b.map(e => [].concat(d, e))));
 const cartesian = (a, b, ...c) => (b ? cartesian(f(a, b), ...c) : a);
-let variations = cartesian.apply(cartesian, optionsOrder.map(e => options[e])).map(e => {
-	return {
-		locale: e[0],
-		auth: e[1]
-	};
+let variations = cartesian.apply(cartesian, optionsOrder.map(e => options[e])).map(v => {
+	return cartesian.apply(cartesian, optionsOrder.map((e, i) => {
+		let t = v[i];
+		let f = [t];
+		while (fallbacks[e][t]) {
+			t = fallbacks[e][t];
+			f.push(t);
+		}
+		return f;
+	})).map(e => {
+		let q = createOptionString({
+			locale: e[0],
+			auth: e[1]
+		});
+		return {
+			q: q,
+			hash: crypto.createHash('md5').update(q).digest("hex")
+		};
+	});
 });
-
-console.log(fallbacks.locale);
-console.log(fallbacks.auth);
+// console.log(fallbacks.locale);
+// console.log(fallbacks.auth);
 // console.log(variations);
 
 function createOptionString(params) {
@@ -72,6 +85,9 @@ function createOptionString(params) {
 		return d;
 	}, {}));
 }
+let templateVersionCache = null;
+let template = null;
+let versionCache = null;
 
 exports.handler = async function (event, context, callback) {
 	let leoaws = await config.leoaws;
@@ -79,29 +95,35 @@ exports.handler = async function (event, context, callback) {
 	let settings = Object.assign({
 
 	}, event);
-	let user = await request.getUser(event);
+	// let user = await request.getUser(event);
 	//Categorize what they are trying to do.
 
 	//this will throw an error if access is denied
-	await user.authorize(event, {
-		lrn: 'lrn:leo:botmon:::cron',
-		action: event.httpMethod == "POST" ? "PUTVersion" : "GetVersion"
-	});
+	// await user.authorize(event, {
+	// 	lrn: 'lrn:leo:botmon:::cron',
+	// 	action: event.httpMethod == "POST" ? "PUTVersion" : "GetVersion"
+	// });
 	console.time("done");
 	if (event.httpMethod == "GET") {
 		async function getVersions() {
-			return dynamodb.scan(config.resources.Versions);
+			if (!versionCache) {
+				versionCache = await dynamodb.scan(config.resources.Versions);
+			}
+			return versionCache;
 		}
 		async function getTemplateVersions(id) {
-			return dynamodb.query({
-				TableName: config.resources.TemplateVersions,
-				IndexName: "list",
-				KeyConditionExpression: "id = :id",
-				ExpressionAttributeValues: {
-					":id": id
-				},
-				"ReturnConsumedCapacity": 'TOTAL'
-			});
+			if (!templateVersionCache) {
+				templateVersionCache = await dynamodb.query({
+					TableName: config.resources.TemplateVersions,
+					IndexName: "list",
+					KeyConditionExpression: "id = :id",
+					ExpressionAttributeValues: {
+						":id": id
+					},
+					"ReturnConsumedCapacity": 'TOTAL'
+				});
+			}
+			return templateVersionCache;
 		}
 		let pageId = event.pathParameters.id;
 		let [versions, templateVersions] = await Promise.all([getVersions(), getTemplateVersions(pageId)]);
@@ -132,81 +154,57 @@ exports.handler = async function (event, context, callback) {
 				body: "Template Not Found"
 			});
 		}
-		let template = await dynamodb.get(config.resources.TemplateVersions, {
-			v: latestVersion.id,
-			id: pageId
-		});
 
-		let fileContents = {};
-		let fileMap = Object.keys(template.files).reduce((a, key, i) => {
-			let h = crypto.createHash('md5').update(key).digest('hex');
-			a[createOptionString(querystring.parse(key))] = h;
-			fileContents[h] = template.files[key];
-			return a;
-		}, {});
-
-		let gzip = zlib.createGzip();
-
-		template.files = fileContents;
-
-		let filemaps = {};
-		variations.forEach(v => {
-			let q = createOptionString(v);
-			if (q in fileMap) {
-				filemaps[q] = fileMap[q];
-				return;
-			} else {
-				let tryVariations = cartesian.apply(cartesian, optionsOrder.map(e => {
-					let t = v[e];
-					let f = [t];
-					while (fallbacks[e][t]) {
-						t = fallbacks[e][t];
-						f.push(t);
-					}
-					return f;
-				})).map(e => {
-					return {
-						locale: e[0],
-						auth: e[1]
-					};
-				});
-				for (var i = 0; i < tryVariations.length; i++) {
-					let q2 = createOptionString(tryVariations[i]);
-					if (q2 in fileMap) {
-						filemaps[q] = fileMap[q2];
-						return;
+		if (!template) {
+			template = await dynamodb.get(config.resources.TemplateVersions, {
+				v: latestVersion.id,
+				id: pageId
+			});
+			let map = {};
+			Object.keys(template.map).forEach(key => {
+				//In case we added new defaults, that would change the hash
+				let id = createOptionString(querystring.parse(key));
+				let hash = crypto.createHash('md5').update(id).digest('hex');
+				map[hash] = template.map[key];
+			});
+			let filemaps = {};
+			variations.forEach(v => {
+				for (var i = 0; i < v.length; i++) {
+					if (v[i].hash in map) {
+						filemaps[v[0].q] = v[i].hash;
+						break;
 					}
 				}
-			}
-		});
-
-		zlib.gzip(JSON.stringify(fileContents), (err, buf) => {
-			template.files = buf.toString("base64");
-			callback(null, template);
-		});
+			});
+			template.map = filemaps;
+		}
+		console.timeEnd("done");
+		callback(null, template);
 	} else if (event.httpMethod == "POST") {
 		let compiled = {};
 
 		await dynamodb.update(config.resources.Templates, event.pathParameters.id, {});
 		await dynamodb.update(config.resources.Versions, event.pathParameters.version, {});
 
-		let entries = Object.keys(event.body).map(e => {
+		let fileContents = {};
+		let fileMap = {};
+		Object.keys(event.body).map(e => {
 			let id = createOptionString(querystring.parse(e));
-			return {
-				id: id,
-				b: event.body[e]
-			};
-		}).reduce((d, k) => {
-			d[k.id] = k.b;
-			return d;
-		}, {});
-
-		await dynamodb.update(config.resources.TemplateVersions, {
-			id: event.pathParameters.id,
-			v: event.pathParameters.version
-		}, {
-			files: entries
+			let hash = crypto.createHash('md5').update(id).digest('hex');
+			fileMap[id] = hash;
+			fileContents[hash] = event.body[e];
 		});
-		return callback();
+
+		let gzip = zlib.createGzip();
+		zlib.gzip(JSON.stringify(fileContents), async (err, buf) => {
+			await dynamodb.update(config.resources.TemplateVersions, {
+				id: event.pathParameters.id,
+				v: event.pathParameters.version
+			}, {
+				files: buf.toString("base64"),
+				map: fileMap
+			});
+			return callback();
+		});
 	}
 };
