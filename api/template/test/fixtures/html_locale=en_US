@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href="https://assets.youniqueproducts.com/favicon.ico?v=1502681773" type="image/x-icon" rel="icon">
+    <link href="https://assets.youniqueproducts.com/favicon.ico?v=1502681773" type="image/x-icon" rel="shortcut icon">
+    <link rel="stylesheet" type="text/css" href="https://assets.youniqueproducts.com/css/younique_products.css?v=1525729335">
+    <link rel="stylesheet" type="text/css" href="https://assets.youniqueproducts.com/css/younique_core.css?v=1525729335">
+    <title>__TITLE__</title>
+</head>
+<body id="shop" class="corpOwned en_US market_US language_en">
+<header id="siteHead" class="clr-fix ">
+    <div class="clr ribbon">
+        <div class="shopperUtil" id="userPanel">
+            <div class="userDisplay clr-fix regularTools">
+                <ul class="FL flatList lineNav no-print siteLanguage">
+                    <li class="dropParent">
+                        <a href="#" class="no-click">
+                <span class="acctLabel">
+                    English <span class="ico icon-arrow-down-2"></span>
+                </span>
+                        </a>
+                        <div class="dropDown userMenu languageMenu">
+                            <div class="ddCnts ovfl">
+                                            <span class="block">
+                            <a data-locale="en_US" class="bold languageOption selected" href=""><span
+                                    class="mr10 ico icon-checkmark v-hide"></span>English</a>
+                        </span>
+                                <span class="block">
+                            <a data-locale="es_US" class="bold languageOption " href=""><span
+                                    class="mr10 ico icon-checkmark v-hide"></span>Español</a>
+                        </span>
+
+                            </div>
+                        </div>
+
+                    </li>
+                </ul>
+                <ul class="FR flatList greetUtility lineNav ">
+                    <li class="m-hid noShow">Welcome!</li>
+                    <li><a href="/account/signin">Log in</a></li>
+                    <li class="noShow">or</li>
+                    <li><a href="/account/join">Create an account</a></li>
+                </ul>
+
+                <ul class="pAbs FR flatList lineNav utilityLinks">
+                    <li class="cart hasItems" id="miniCartTrig" style="display: none">
+                        <a id="viewCart" href="/products/cart" class="pRel shoppingcart" title="View my cart">
+                            <span class="ico icon-cart hasItems"></span>
+                            <span id="cartItems" class="pAbs"><span id="itemCount"></span></span>
+                            <span class="pAbs" id="checkOutLabel">Checkout</span>
+                        </a>
+
+                        <div id="miniCart" data-marketid="1" data-kudosdate="1493622000">
+                            <div class="touch-only ctr closeCart">close and continue shopping</div>
+                            <div class="contents">
+                                <ul class="flatList itemHead">
+                                    <li class="alt"><span class="pQty">Qty</span><span class="pName">Product</span><span
+                                            class="pPrice">Price</span></li>
+                                </ul>
+                                <ul class="flatList items">
+                                    <li class="loadCart">
+                                        <span>
+                                            <img src="https://assets.youniqueproducts.com/universal/img/loading_lg.gif?v=1528212047"
+                                                 alt="Loading cart" title="Loading cart">                                        </span>
+                                    </li>
+                                </ul>
+                                <a href="/products/cart" class="btn checkout"><span class="icomoon"
+                                                                                    data-icon=">"></span> Proceed to
+                                    checkout</a>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="cart isEmpty">
+                        <a id="startShopping" href="/products" title="Start Shopping!"><span
+                                class="ico icon-cart"></span></a>
+                    </li>
+                    <li class="mktPckr dropParent ">
+                        <span class="selectedFlag block">
+                            <img src="https://assets.youniqueproducts.com/universal/img/sprites/market_1.png?v=1528212047"
+                                 id="myCountry" class="myMktFlag" alt="">                        </span>
+                        <div id="changemarket" class="dropDown">
+                            <div class="ddCnts ovfl flagList">
+                                <ul class="flatList inlineNav col-wrap t-2col">
+                                    <li class="col dw-50 lhNorm">
+                                    <span class="noWrap clr-fix">
+                                        <label class="FL mr5 market_1                                        selected"
+                                               title="Show prices in USD">
+                                            <input type="radio" class="changemarket" name="changemarket"
+                                                   data-default-language="en_US" value="1" checked="checked">
+                                        </label>
+                                        <span class="FL bold mb5 changemarket marketName">
+                                                                                            U.S.A (USD)
+                                                                                    </span>
+                                    </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="en_US" class="bold marketLanguageOption selected"
+                                               href=""><span class="mr10 ico icon-checkmark v-hide"></span>English</a>
+                                        </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="es_US" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>Español</a>
+                                        </span>
+                                    </li>
+                                    <li class="col dw-50 lhNorm">
+                                    <span class="noWrap clr-fix">
+                                        <label class="FL mr5 market_2                                        "
+                                               title="Show prices in CAD">
+                                            <input type="radio" class="changemarket" name="changemarket"
+                                                   data-default-language="en_CA" value="2">
+                                        </label>
+                                        <span class="FL bold mb5 changemarket marketName">
+                                                                                            Canada (CAD)
+                                                                                    </span>
+                                    </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="en_CA" class="bold marketLanguageOption" href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>English</a>
+                                        </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="fr_CA" class="bold marketLanguageOption" href="">
+                                                <span class="mr10 ico icon-checkmark v-hide"></span>Français</a>
+                                        </span>
+                                    </li>
+                                </ul>
+                                <ul class="flatList inlineNav col-wrap t-2col">
+                                    <li class="col dw-50 lhNorm">
+                                    <span class="noWrap clr-fix">
+                                        <label class="FL mr5 market_3" title="Show prices in AUD">
+                                            <input type="radio" class="changemarket" name="changemarket"
+                                                   data-default-language="en_AU" value="3">
+                                        </label>
+                                        <span class="FL bold mb5 changemarket marketName">
+                                                                                            Australia (AUD)
+                                                                                    </span>
+                                    </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="en_AU" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>English</a>
+                                        </span>
+                                    </li>
+                                    <li class="col dw-50 lhNorm">
+                                    <span class="noWrap clr-fix">
+                                        <label class="FL mr5 market_4" title="Show prices in NZD">
+                                            <input type="radio" class="changemarket" name="changemarket"
+                                                   data-default-language="en_NZ" value="4">
+                                        </label>
+                                        <span class="FL bold mb5 changemarket marketName">
+                                                                                            New Zealand (NZD)
+                                                                                    </span>
+                                    </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="en_NZ" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>English</a>
+                                        </span>
+                                    </li>
+                                </ul>
+                                <ul class="flatList inlineNav col-wrap t-2col">
+                                    <li class="col dw-50 lhNorm">
+                                    <span class="noWrap clr-fix">
+                                        <label class="FL mr5 market_5" title="Show prices in GBP">
+                                            <input type="radio" class="changemarket" name="changemarket"
+                                                   data-default-language="en_UK" value="5">
+                                        </label>
+                                        <span class="FL bold mb5 changemarket marketName">United Kingdom (GBP)</span>
+                                    </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="en_UK" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>English</a>
+                                        </span>
+                                    </li>
+                                    <li class="col dw-50 lhNorm">
+                                    <span class="noWrap clr-fix">
+                                        <label class="FL mr5 market_6" title="Show prices in MXN">
+                                            <input type="radio" class="changemarket" name="changemarket"
+                                                   data-default-language="es_MX" value="6">
+                                        </label>
+                                        <span class="FL bold mb5 changemarket marketName">
+                                                                                            Mexico (MXN)
+                                                                                    </span>
+                                    </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="es_MX" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>Español</a>
+                                        </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="en_MX" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>English</a>
+                                        </span>
+                                    </li>
+                                </ul>
+                                <ul class="flatList inlineNav col-wrap t-2col">
+                                    <li class="col dw-50 lhNorm">
+                                    <span class="noWrap clr-fix">
+                                        <label class="FL mr5 market_7                                        "
+                                               title="Show prices in EUR">
+                                            <input type="radio" class="changemarket" name="changemarket"
+                                                   data-default-language="de_DE" value="7">
+                                        </label>
+                                        <span class="FL bold mb5 changemarket marketName">
+                                                                                            Germany (EUR)
+                                                                                    </span>
+                                    </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="de_DE" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>Deutsch</a>
+                                        </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="en_DE" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>English</a>
+                                        </span>
+                                    </li>
+                                    <li class="col dw-50 lhNorm">
+                                    <span class="noWrap clr-fix">
+                                        <label class="FL mr5 market_8                                        "
+                                               title="Show prices in EUR">
+                                            <input type="radio" class="changemarket" name="changemarket"
+                                                   data-default-language="fr_FR" value="8">
+                                        </label>
+                                        <span class="FL bold mb5 changemarket marketName">
+                                                                                            France (EUR)
+                                                                                    </span>
+                                    </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="fr_FR" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>Français</a>
+                                        </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="en_FR" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>English</a>
+                                        </span>
+                                    </li>
+                                </ul>
+                                <ul class="flatList inlineNav col-wrap t-2col">
+                                    <li class="col dw-50 lhNorm">
+                                    <span class="noWrap clr-fix">
+                                        <label class="FL mr5 market_9" title="Show prices in EUR">
+                                            <input type="radio" class="changemarket" name="changemarket"
+                                                   data-default-language="es_ES" value="9">
+                                        </label>
+                                        <span class="FL bold mb5 changemarket marketName">Spain (EUR)</span>
+                                    </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="es_ES" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>Español</a>
+                                        </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="en_ES" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>English</a>
+                                        </span>
+                                    </li>
+                                    <li class="col dw-50 lhNorm">
+                                    <span class="noWrap clr-fix">
+                                        <label class="FL mr5 market_10"
+                                               title="Show prices in HKD">
+                                            <input type="radio" class="changemarket" name="changemarket"
+                                                   data-default-language="zh_HK" value="10">
+                                        </label>
+                                        <span class="FL bold mb5 changemarket marketName">Hong Kong (HKD)</span>
+                                    </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="zh_HK" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>繁體中文</a>
+                                        </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="en_HK" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>English</a>
+                                        </span>
+                                    </li>
+                                </ul>
+                                <ul class="flatList inlineNav col-wrap t-2col">
+                                    <li class="col dw-50 lhNorm">
+                                    <span class="noWrap clr-fix">
+                                        <label class="FL mr5 market_11" title="Show prices in EUR">
+                                            <input type="radio" class="changemarket" name="changemarket"
+                                                   data-default-language="it_IT" value="11">
+                                        </label>
+                                        <span class="FL bold mb5 changemarket marketName">Italy (EUR)</span>
+                                    </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="it_IT" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>Italiano</a>
+                                        </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="en_IT" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>English</a>
+                                        </span>
+                                    </li>
+                                    <li class="col dw-50 lhNorm">
+                                    <span class="noWrap clr-fix">
+                                        <label class="FL mr5 market_12" title="Show prices in EUR">
+                                            <input type="radio" class="changemarket" name="changemarket"
+                                                   data-default-language="en_IE" value="12">
+                                        </label>
+                                        <span class="FL bold mb5 changemarket marketName">Ireland (EUR)</span>
+                                    </span>
+                                        <span class="block changemarket">
+                                            <a data-locale="en_IE" class="bold marketLanguageOption " href=""><span
+                                                    class="mr10 ico icon-checkmark v-hide"></span>English</a>
+                                        </span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <nav class="primaryNav">
+            <ul class="flatList lineNav mainNavBar">
+                <li class="langChange">
+                    <a href="/products" class=" sn langChange">SHOP</a>
+                </li>
+                <li class="langChange">
+                    <a href="/business/presenterinfo" class=" langChange">JOIN</a>
+                </li>
+                <li class="langChange">
+                    <a href="/business/party" class=" langChange">PARTY</a>
+                </li>
+                <li class="m-disp"><a href="javascript:void(0);" id="showMobileNavMore" class="ico icon-menu"></a></li>
+                <li class="navLogo corpNavNoPresLogo">
+                    <span class="corpImg">
+                <a href="/"><img
+                        src="https://assets.youniqueproducts.com/universal/img/global/younique_mark.png?v=1528212047"
+                        alt="Younique, LLC" id="siteLogoMark"></a>            </span>
+                    <div class="logo">
+                        <a href="/"><img
+                                src="https://assets.youniqueproducts.com/universal/img/global/younique_logo.png?v=1528212047"
+                                alt="Younique, LLC" id="siteLogo"></a>
+                        <div id="printLogo" class="print-only">
+                            <img src="https://assets.youniqueproducts.com/universal/img/logo_print.gif?v=1528212047"
+                                 alt=""></div>
+                    </div>
+                </li>
+                <li class="m-hid langChange">
+                    <a href="/looks/browse" class="">
+                        WEAR IT </a>
+                </li>
+                <li class="m-hid langChange">
+                    <a href="/business/about" class="">ABOUT</a>
+                </li>
+                <li class="m-hid langChange">
+                    <a href="/business/support" class=" sn">
+                        SUPPORT </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
+__CONTENT__
+<footer id="footer" class="  ">
+    <div class="inner c-flow">
+        <div class="col-wrap">
+            <div class="col dw-70 left">
+                <div class="copyNotice">
+                    <p class="comprT">
+                        Copyright © Younique, LLC. <span id="copyrightDate">2018</span>. All Rights Reserved.</p>
+                    <div class="footerMenu">
+                        <div class="fm m1">
+                            <ul class="flatList regList">
+                                <li>
+                                    <a href="/products">Shop</a>
+                                </li>
+                                <li>
+                                    <a href="/business/presenterinfo">Join</a>
+                                </li>
+                                <li>
+                                    <a href="/business/party">Party</a>
+                                </li>
+                                <li>
+                                    <a href="/business/careers">Careers</a>
+                                </li>
+                                <li>
+                                    <a href="/looks/browse">Younique Looks</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="fm m2">
+                            <ul class="flatList regList">
+                                <li>
+                                    <a href="/products/kudos">Monthly Kudos</a>
+                                </li>
+                                <li>
+                                    <a href="/business/about">About Younique</a>
+                                </li>
+                                <li>
+                                    <a href="/business/leaderboards">Rising Stars</a>
+                                </li>
+                                <li>
+                                    <a href="/business/founderscircle">Triple Digits Club</a>
+                                </li>
+
+                                <li>
+                                    <a href="/business/founders">Meet the Founders</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="fm m2">
+                            <ul class="flatList regList">
+                                <li>
+                                    <a href="/business/support">Customer Support</a>
+                                </li>
+                                <li>
+                                    <a href="/business/privacy">Privacy Policy</a>
+                                </li>
+                                <li>
+                                    <a href="/business/backorders">Backorder Policy</a>
+                                </li>
+                                <li>
+                                    <a class="catalogLink" href="https://younique-dfiles.s3-us-west-2.amazonaws.com/s3fs-public/Younique_Product_Catalog_2018_03_en_US.pdf" target="_blank"> Catalog Download</a>
+                                </li>
+                                <li>
+                                    <a href="/loveitguarantee">The Love It Guarantee</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <span class="clr"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="col dw-30 left t-ctr">
+                <div class="y_social left withQL">
+                    <p class="comprT t-ctr">Connect with Younique</p>
+                    <div class="addthis_inline_follow_toolbox s2 t-ctr"><div id="atftbx" class="at-follow-tbx-element addthis-smartlayers addthis-animated at4-show"><p><span></span></p><div class="addthis_toolbox addthis_default_style"><a class="at300b at-follow-btn" data-svc="facebook" data-svc-id="YouniqueProducts" title="Follow on Facebook" href="http://www.facebook.com/YouniqueProducts" target="_blank"><span class="at-icon-wrapper" style="background-color: rgb(59, 89, 152); line-height: 32px; height: 32px; width: 32px; border-radius: 12%;"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" version="1.1" role="img" aria-labelledby="at-svg-facebook-1" class="at-icon at-icon-facebook" style="fill: rgb(255, 255, 255); width: 32px; height: 32px;"><title id="at-svg-facebook-1">Facebook</title><g><path d="M22 5.16c-.406-.054-1.806-.16-3.43-.16-3.4 0-5.733 1.825-5.733 5.17v2.882H9v3.913h3.837V27h4.604V16.965h3.823l.587-3.913h-4.41v-2.5c0-1.123.347-1.903 2.198-1.903H22V5.16z" fill-rule="evenodd"></path></g></svg></span><span class="addthis_follow_label"><span class="at4-visually-hidden">Follow on </span>Facebook</span></a><a class="at300b at-follow-btn" data-svc="instagram" data-svc-id="younique_corporate" title="Follow on Instagram" href="http://instagram.com/younique_corporate" target="_blank"><span class="at-icon-wrapper" style="background-color: rgb(224, 53, 102); line-height: 32px; height: 32px; width: 32px; border-radius: 12%;"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" version="1.1" role="img" aria-labelledby="at-svg-instagram-2" class="at-icon at-icon-instagram" style="fill: rgb(255, 255, 255); width: 32px; height: 32px;"><title id="at-svg-instagram-2">Instagram</title><g><path d="M16 5c-2.987 0-3.362.013-4.535.066-1.17.054-1.97.24-2.67.512a5.392 5.392 0 0 0-1.95 1.268 5.392 5.392 0 0 0-1.267 1.95c-.272.698-.458 1.498-.512 2.67C5.013 12.637 5 13.012 5 16s.013 3.362.066 4.535c.054 1.17.24 1.97.512 2.67.28.724.657 1.337 1.268 1.95a5.392 5.392 0 0 0 1.95 1.268c.698.27 1.498.457 2.67.51 1.172.054 1.547.067 4.534.067s3.362-.013 4.535-.066c1.17-.054 1.97-.24 2.67-.51a5.392 5.392 0 0 0 1.95-1.27 5.392 5.392 0 0 0 1.268-1.95c.27-.698.457-1.498.51-2.67.054-1.172.067-1.547.067-4.534s-.013-3.362-.066-4.535c-.054-1.17-.24-1.97-.51-2.67a5.392 5.392 0 0 0-1.27-1.95 5.392 5.392 0 0 0-1.95-1.267c-.698-.272-1.498-.458-2.67-.512C19.363 5.013 18.988 5 16 5zm0 1.982c2.937 0 3.285.01 4.445.064 1.072.05 1.655.228 2.042.38.514.198.88.437 1.265.822.385.385.624.75.823 1.265.15.387.33.97.38 2.042.052 1.16.063 1.508.063 4.445 0 2.937-.01 3.285-.064 4.445-.05 1.072-.228 1.655-.38 2.042-.198.514-.437.88-.822 1.265-.385.385-.75.624-1.265.823-.387.15-.97.33-2.042.38-1.16.052-1.508.063-4.445.063-2.937 0-3.285-.01-4.445-.064-1.072-.05-1.655-.228-2.042-.38-.514-.198-.88-.437-1.265-.822a3.408 3.408 0 0 1-.823-1.265c-.15-.387-.33-.97-.38-2.042-.052-1.16-.063-1.508-.063-4.445 0-2.937.01-3.285.064-4.445.05-1.072.228-1.655.38-2.042.198-.514.437-.88.822-1.265.385-.385.75-.624 1.265-.823.387-.15.97-.33 2.042-.38 1.16-.052 1.508-.063 4.445-.063zm0 12.685a3.667 3.667 0 1 1 0-7.334 3.667 3.667 0 0 1 0 7.334zm0-9.316a5.65 5.65 0 1 0 0 11.3 5.65 5.65 0 0 0 0-11.3zm7.192-.222a1.32 1.32 0 1 1-2.64 0 1.32 1.32 0 0 1 2.64 0" fill-rule="evenodd"></path></g></svg></span><span class="addthis_follow_label"><span class="at4-visually-hidden">Follow on </span>Instagram</span></a><a class="at300b at-follow-btn" data-svc="pinterest" data-svc-id="youniquemakeup" title="Follow on Pinterest" href="http://www.pinterest.com/youniquemakeup" target="_blank"><span class="at-icon-wrapper" style="background-color: rgb(203, 32, 39); line-height: 32px; height: 32px; width: 32px; border-radius: 12%;"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" version="1.1" role="img" aria-labelledby="at-svg-pinterest_share-3" class="at-icon at-icon-pinterest_share" style="fill: rgb(255, 255, 255); width: 32px; height: 32px;"><title id="at-svg-pinterest_share-3">Pinterest</title><g><path d="M7 13.252c0 1.81.772 4.45 2.895 5.045.074.014.178.04.252.04.49 0 .772-1.27.772-1.63 0-.428-1.174-1.34-1.174-3.123 0-3.705 3.028-6.33 6.947-6.33 3.37 0 5.863 1.782 5.863 5.058 0 2.446-1.054 7.035-4.468 7.035-1.232 0-2.286-.83-2.286-2.018 0-1.742 1.307-3.43 1.307-5.225 0-1.092-.67-1.977-1.916-1.977-1.692 0-2.732 1.77-2.732 3.165 0 .774.104 1.63.476 2.336-.683 2.736-2.08 6.814-2.08 9.633 0 .87.135 1.728.224 2.6l.134.137.207-.07c2.494-3.178 2.405-3.8 3.533-7.96.61 1.077 2.182 1.658 3.43 1.658 5.254 0 7.614-4.77 7.614-9.067C26 7.987 21.755 5 17.094 5 12.017 5 7 8.15 7 13.252z" fill-rule="evenodd"></path></g></svg></span><span class="addthis_follow_label"><span class="at4-visually-hidden">Follow on </span>Pinterest</span></a><a class="at300b at-follow-btn" data-svc="youtube" data-svc-id="YouniqueCorporate" title="Follow on YouTube" href="http://www.youtube.com/user/YouniqueCorporate?sub_confirmation=1" target="_blank"><span class="at-icon-wrapper" style="background-color: rgb(205, 32, 31); line-height: 32px; height: 32px; width: 32px; border-radius: 12%;"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" version="1.1" role="img" aria-labelledby="at-svg-youtube-4" class="at-icon at-icon-youtube" style="fill: rgb(255, 255, 255); width: 32px; height: 32px;"><title id="at-svg-youtube-4">YouTube</title><g><path d="M13.73 18.974V12.57l5.945 3.212-5.944 3.192zm12.18-9.778c-.837-.908-1.775-.912-2.205-.965C20.625 8 16.007 8 16.007 8c-.01 0-4.628 0-7.708.23-.43.054-1.368.058-2.205.966-.66.692-.875 2.263-.875 2.263S5 13.303 5 15.15v1.728c0 1.845.22 3.69.22 3.69s.215 1.57.875 2.262c.837.908 1.936.88 2.426.975 1.76.175 7.482.23 7.482.15 0 .08 4.624.072 7.703-.16.43-.052 1.368-.057 2.205-.965.66-.69.875-2.262.875-2.262s.22-1.845.22-3.69v-1.73c0-1.844-.22-3.69-.22-3.69s-.215-1.57-.875-2.262z" fill-rule="evenodd"></path></g></svg></span><span class="addthis_follow_label"><span class="at4-visually-hidden">Follow on </span>YouTube</span></a><a class="at300b at-follow-btn" data-svc="google_follow" data-svc-id="+Youniqueproducts" title="Follow on Google Follow" href="https://plus.google.com/+Youniqueproducts" target="_blank"><span class="at-icon-wrapper" style="background-color: rgb(220, 78, 65); line-height: 32px; height: 32px; width: 32px; border-radius: 12%;"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 32 32" version="1.1" role="img" aria-labelledby="at-svg-google_plusone_share-5" class="at-icon at-icon-google_plusone_share" style="fill: rgb(255, 255, 255); width: 32px; height: 32px;"><title id="at-svg-google_plusone_share-5">Google+</title><g><path d="M12 15v2.4h3.97c-.16 1.03-1.2 3.02-3.97 3.02-2.39 0-4.34-1.98-4.34-4.42s1.95-4.42 4.34-4.42c1.36 0 2.27.58 2.79 1.08l1.9-1.83C15.47 9.69 13.89 9 12 9c-3.87 0-7 3.13-7 7s3.13 7 7 7c4.04 0 6.72-2.84 6.72-6.84 0-.46-.05-.81-.11-1.16H12zm15 0h-2v-2h-2v2h-2v2h2v2h2v-2h2v-2z" fill-rule="evenodd"></path></g></svg></span><span class="addthis_follow_label"><span class="at4-visually-hidden">Follow on </span>Google Follow</span></a><div class="atclear"></div></div></div></div>
+                </div>
+
+                <div class="left whtText read padT1 padTB2 dsaSeal t-ctr">
+                    We are proud to be a member of the Direct Selling Association. <br> For more information, click <a href="https://www.youniqueproducts.com/business/directselling" target="_blank" style="color:#e0499a">here</a>.                            </div>
+                <a class="ilBlock" href="/business/directselling"><img src="https://assets.youniqueproducts.com/universal/img/dsalogo.png?v=1528212047" alt="Direct Selling Association" class="dsaLogo"></a>
+                <a class="ilBlock" href="http://www.bbb.org/utah/business-reviews/cosmetic-sales-by-internet/younique-llc-in-lehi-ut-22338963" target="_blank" rel="nofollow"><img src="https://assets.youniqueproducts.com/universal/img/bbb1.png?v=1528212047" alt="BBB Accredited Business" class="bbbSeal"></a>
+            </div>
+            <span class="clr"></span>
+        </div>
+    </div>
+    <div class="left languageOptions">
+        <div class="c-flow">
+            <ul class="flatList lineNav regList">
+                <li class="selected">
+                    <a data-locale="en_US" class="languageOption" href="javascript:void(0);">english</a>
+                </li>
+                <li class="">
+                    <a data-locale="es_US" class="languageOption" href="javascript:void(0);">español</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</footer>
+</body>
+</html>

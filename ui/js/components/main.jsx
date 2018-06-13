@@ -4,28 +4,44 @@ import { connect } from 'react-redux';
 import Footer from './Sections/footer.jsx';
 import Header from './Sections/header.jsx';
 
-import Home from './Pages/home.jsx';
-import SubPage from './Pages/subpage.jsx';
 
-class App extends React.Component {
-	constructor(props) {
-		super(props);
-		this.state = {};
+import {watch} from '../ducks/versions.js';
+
+
+class ProductList extends React.Component {
+  componentDidMount() {
+    this.props.watch();
+  }
+
+  render() {
+	return [
+        <Header key='1' />,
+        this.props.versions.map(v=>(
+        	<div key={v.id} onClick={this.props.onSomeClick.bind(null, v)}>
+        	{v.id}
+        	</div>
+        )),
+        <Footer key='2' />
+    ];
+  }
+};
+
+
+// let App = (props) => {
+// 	console.log(props);
+// 	props.dispatch(watch());
+// 	return [
+//         <Header key='1' />,
+//         'HELLO',
+//         <Footer key='2' />
+//     ];
+// };
+
+export default connect(state=>({
+	versions: state.version.list
+}), dispatch=>({
+	watch: () =>dispatch(watch()),
+	onSomeClick: (version)=>{
+		console.log("DO SOMETHING", version);
 	}
-	render() {
-		var pages = {
-			home: <Home />,
-			sub: <SubPage />
-		};
-
-		return (<section>
-            <Header />
-            {pages[this.props.page]}
-            <Footer />
-        </section>);
-	}
-}
-
-export default connect((state) => {
-	return state.navigation;
-})(App);
+}))(ProductList);
