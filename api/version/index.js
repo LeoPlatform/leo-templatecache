@@ -6,6 +6,20 @@ exports.handler = async function (event, context, callback) {
 	let dynamodb = leoaws.dynamodb;
 	let settings = Object.assign({}, event);
 
-	let versions = await dynamodb.scan(config.resources.Versions);
-	callback(null, versions);
+	if (event.pathParameters.version) {
+		let templates = await dynamodb.query({
+			TableName: config.resources.TemplateVersions,
+			IndexName: "v-id-index",
+			KeyConditionExpression: "v = :v",
+			ExpressionAttributeValues: {
+				":v": event.pathParameters.version
+			},
+			"ReturnConsumedCapacity": 'TOTAL'
+		});
+		callback(null, templates);
+	} else {
+		let versions = await dynamodb.scan(config.resources.Versions);
+		callback(null, versions);
+	}
+
 };

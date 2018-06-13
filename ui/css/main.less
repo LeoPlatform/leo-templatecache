@@ -1,41 +1,63 @@
 @import "normalize.css";
 
-html, body,div#root {
+html, body, div#root {
   height: 100%;
   overflow: hidden;
   background: url(../images/test.png);
 }
 
 div#root {
-	background: yellow;
-	>header {
-		height: 60px;
-		background: lightblue;
-		ul {
-			margin: 0;
-			list-style: none;
-			overflow: hidden;
-			position: relative;
-			li {
-				float: left;
-				display: block;
-				margin-right: 30px;
-				border: 1px solid black;
-				cursor: pointer;
-
-				&.selected {
-					background: blue;
-					color: white;
-				}
-
+	header {
+		padding-top: 10px;
+		padding-left: 20px;
+		a {
+			display: block;
+			float: left;
+			padding: 20px;
+			height: 50px;
+			cusor: pointer;
+			&:hover {
+				background: white;
+				opacity: .6
+			}
+			&.selected {
+				background: white;
 			}
 		}
+		height: 60px;
+		background: lightblue;
+		display: block;
+		overflow: hidden;
 	}
 	>div {
-		height: calc(~"100% - 180px");
-	}
-	>footer {
-		height: 120px;
-		background: lightgreen;
+		width: 49.9%;
+		float: left;
+		h3 {
+			text-align: center;
+		}
+		>table {
+			width: 100%;
+			border-spacing: 0px;
+			border-collapse: collapse;
+			thead {
+				background: #ccc;
+			}
+			tbody {
+				tr:nth-child(even) {
+					background: #eee;
+				}
+				tr:hover {
+					background: #eff;
+					cursor: pointer;
+				}
+				tr.selected, tr.selected:hover {
+					background: #dff;
+				}
+			}
+			td,th {
+				padding: 10px 10px;
+			}
+		}
+		
 	}
 }

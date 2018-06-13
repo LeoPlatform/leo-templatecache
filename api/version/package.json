@@ -12,7 +12,10 @@
 	"config": {
 		"leo": {
 			"type": "resource",
-			"uri": "GET:/api/version",
+			"uri": [
+				"GET:/api/version",
+				"GET:/api/version/{version}"
+			],
 			"handler": "handler",
 			"role": null,
 			"memory": 256,
