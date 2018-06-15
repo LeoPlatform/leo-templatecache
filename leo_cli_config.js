@@ -9,8 +9,10 @@ module.exports = {
 				}),
 				public: false,
 				static: {
-					s3: "s3://leomicroservices-leos3bucket-10v1vi32gpjy1/leo_template_cache",
-					cloudfront: ""
+					s3: "s3://leomicroservices-leos3bucket-10v1vi32gpjy1/leo_templatecache",
+					cloudfront: "https://dl3oo5x3a6dzh.cloudfront.net/",
+					cognito_id: "us-west-2:aa1428e4-3b13-4dc2-ac73-e2f8c9e5a3b4",
+					cognito_region: "us-west-2",
 				},
 				stack: env + "LeoTemplateCache"
 			}, //{

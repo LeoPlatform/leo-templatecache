@@ -1,7 +1,7 @@
 "use strict";
 let config = require("leo-config").bootstrap(require("../../leo_config.js"));
 
-exports.handler = async function (event, context, callback) {
+exports.handler = require("leo-sdk/wrappers/resource")(async function (event, context, callback) {
 	let leoaws = await config.leoaws;
 	let dynamodb = leoaws.dynamodb;
 	let settings = Object.assign({}, event);
@@ -22,4 +22,4 @@ exports.handler = async function (event, context, callback) {
 		callback(null, versions);
 	}
 
-};
+});

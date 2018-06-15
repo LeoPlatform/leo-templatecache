@@ -10,10 +10,7 @@ module.exports = {
 			TemplateVersions: 'devLeoTemplateCache-TemplateVersions-3D01R5P9LF3H',
 			Versions: 'devLeoTemplateCache-Versions-DUX73NQY4LWP'
 		},
-		leoaws: leoaws({
-			profile: 'default',
-			region: 'us-west-2'
-		}),
+		leoaws: leoaws({}),
 		"leosdk": {
 			"region": "us-west-2",
 			"resources": {
@@ -44,5 +41,10 @@ module.exports = {
 		}
 	},
 	/**overrides on every system when running locally**/
-	_local: {}
+	_local: {
+		leoaws: leoaws({
+			profile: 'default',
+			region: 'us-west-2'
+		})
+	}
 };

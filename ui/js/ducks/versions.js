@@ -14,8 +14,7 @@ const CHANGE_TEMPLATE_OPTIONS = 'VERSIONS_CHANGE_TEMPLATE_OPTIONS';
 //Action Functions
 export const watch = () => {
 	return dispatch =>
-		$.get(`api/version`).promise()
-		.then(response => {
+		$.get(`api/version`, response => {
 			console.log("response", response);
 			dispatch({
 				type: FETCH_SUCCESS,
@@ -29,14 +28,14 @@ export const changeVersion = (v) => {
 			type: PICK_VERSION_BEGIN,
 			version: v
 		});
-		$.get(`api/version/${v.id}`).promise().then(response => {
+		$.get(`api/version/${v.id}`, response => {
 			console.log(response);
 			dispatch({
 				type: PICK_VERSION_SUCCESS,
 				data: response
-			})
+			});
 		});
-	}
+	};
 };
 export const changeTemplate = (v, t, options) => {
 	return dispatch => {
@@ -46,13 +45,13 @@ export const changeTemplate = (v, t, options) => {
 			options: options
 		});
 		console.log(options);
-		$.get(`api/templateVersion/${v.id}/${t.id}`, options).promise().then(response => {
+		$.get(`api/templateVersion/${v.id}/${t.id}`, options, response => {
 			dispatch({
 				type: PICK_TEMPLATE_SUCCESS,
 				data: response
-			})
+			});
 		});
-	}
+	};
 };
 
 //Reducer
