@@ -3,7 +3,15 @@
 const leoaws = require("leo-aws");
 module.exports = {
 	/**defaults applied to every system**/
-	_global: {},
+	_global: {
+		ui: {
+			staticAssets: "https://dl3oo5x3a6dzh.cloudfront.net/leo_templatecache",
+			cognito: {
+				id: "us-west-2:aa1428e4-3b13-4dc2-ac73-e2f8c9e5a3b4"
+			},
+			region: "us-west-2"
+		}
+	},
 	dev: {
 		resources: {
 			Templates: 'devLeoTemplateCache-Templates-R8ZA5K903VCC',
