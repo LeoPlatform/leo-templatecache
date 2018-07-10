@@ -14,7 +14,8 @@
 			"type": "resource",
 			"uri": [
 				"GET:/api/version",
-				"GET:/api/version/{version}"
+				"GET:/api/version/{version}",
+				"POST:/api/version"
 			],
 			"handler": "handler",
 			"role": null,

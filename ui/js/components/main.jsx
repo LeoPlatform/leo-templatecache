@@ -2,17 +2,16 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
 import {watch} from '../ducks/versions.js';
-import {changePage} from '../ducks/navigation.js';
+import {changeMarket} from '../ducks/market.js';
 
 
+import AppBar from '@material-ui/core/AppBar';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Typography from '@material-ui/core/Typography';
+import Toolbar from '@material-ui/core/Toolbar';
 
 import Versions from './tables/versions.jsx';
-// import Templates  from './tables/versions.jsx';
-let Tables = {
-	versions: <Versions key="table"/>,
-	// templates: Templates
-};
-
 
 class ProductList extends React.Component {
   componentDidMount() {
@@ -21,11 +20,22 @@ class ProductList extends React.Component {
 
   render() {
 	return [
-		<header key="header">
-			<a href="#versions" className={this.props.page=="versions"?'selected':''} onClick={this.props.changeTab.bind(null, "versions")}>Versions</a>
-			<a href="#templates" className={this.props.page=="templates"?'selected':''} onClick={this.props.changeTab.bind(null, "templates")}>Templates</a>
-		</header>,
-		Tables[this.props.page]
+		<AppBar position="static">
+		<Typography variant="title" color="inherit">
+			 <Toolbar>
+              Choose a Market
+				<Tabs value={this.props.market} onChange={this.props.changeTab} color="inherit">
+					<Tab label="US" value="US"/>
+					<Tab label="Australia" value="AU"/>
+					<Tab label="United Kingdoom" value="UK"/>
+					<Tab label="New Zealand" value="NZ"/>
+					<Tab label="Germany" value="DE"/>
+					<Tab label="Spain" value="SP"/>
+				</Tabs>
+		 </Toolbar>
+         </Typography>
+	    </AppBar>,
+		<Typography component="div"><Versions key="table"/></Typography>
     ];
   }
 };
@@ -43,12 +53,11 @@ class ProductList extends React.Component {
 
 export default connect(state=>({
 	versions: state.version.list,
-	page: state.navigation.page
+	market: state.market.id
 }), dispatch=>({
 	watch: () =>dispatch(watch()),
-	changeTab: (page,e) =>{
-		e.preventDefault();
-		dispatch(changePage(page));
+	changeTab: (e,market) =>{
+		dispatch(changeMarket(market));
 		return false;
 	},
 	onSomeClick: (version)=>{

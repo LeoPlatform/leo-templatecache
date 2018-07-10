@@ -22,6 +22,7 @@ const sampleData = {
 
 exports.handler = require("leo-sdk/wrappers/resource")(async function (event, context, callback) {
 	let settings = Object.assign({}, event);
+
 	let template = await templateLib.getTemplateVersion(event.pathParameters.id, event.pathParameters.version);
 
 	let files = JSON.parse(zlib.gunzipSync(new Buffer(template.files, 'base64')));
@@ -30,6 +31,7 @@ exports.handler = require("leo-sdk/wrappers/resource")(async function (event, co
 		locale: event.queryStringParameters.locale,
 		auth: event.queryStringParameters.auth,
 	});
+
 	console.log(variation);
 	console.log(template.map);
 	let hash = template.map[variation];
@@ -47,7 +49,6 @@ exports.handler = require("leo-sdk/wrappers/resource")(async function (event, co
 		let w = new Buffer(wrapperFiles[hash]).toString("utf-8");
 		t = w.replace("__CONTENT__", t);
 	}
-	console.log("HOWDY");
 	let lookup = sampleData[authType];
 	t = t.replace(/(__[^\s]+__)/g, (match) => {
 		return lookup[match];

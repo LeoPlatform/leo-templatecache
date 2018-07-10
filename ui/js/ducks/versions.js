@@ -11,6 +11,17 @@ const FETCH_TEMPLATES = 'VERSIONS_FETCH_TEMPLATES';
 
 const CHANGE_TEMPLATE_OPTIONS = 'VERSIONS_CHANGE_TEMPLATE_OPTIONS';
 
+const ADD_RELEASE = 'VERSIONS_ADD_RELEASE';
+
+const SHOW_DIALOG = 'VERSIONS_SHOW_DIALOG';
+const HIDE_DIALOG = 'VERSIONS_HIDE_DIALOG';
+
+const SHOW_CONTENT_DIALOG = 'VERSIONS_SHOW_CONTENT_DIALOG';
+const HIDE_CONTENT_DIALOG = 'VERSIONS_HIDE_CONTENT_DIALOG';
+
+const SHOW_IMPORT_DIALOG = 'VERSIONS_SHOW_IMPORT_DIALOG';
+const HIDE_IMPORT_DIALOG = 'VERSIONS_HIDE_IMPORT_DIALOG';
+
 //Action Functions
 export const watch = () => {
 	return dispatch =>
@@ -37,6 +48,28 @@ export const changeVersion = (v) => {
 		});
 	};
 };
+export const createRelease = (timestamp, name) => {
+	return dispatch => {
+		dispatch({
+			type: ADD_RELEASE,
+			data: {
+				id: name,
+				ts: timestamp
+			}
+		});
+		$.post(`api/version`, {
+			name,
+			timestamp
+		}, response => {
+			console.log(response);
+			dispatch({
+				type: ADD_RELEASE,
+				data: response
+			});
+		});
+	}
+};
+
 export const changeTemplate = (v, t, options) => {
 	return dispatch => {
 		dispatch({
@@ -50,6 +83,54 @@ export const changeTemplate = (v, t, options) => {
 				type: PICK_TEMPLATE_SUCCESS,
 				data: response
 			});
+		});
+	};
+};
+
+export const showDialog = () => {
+	return dispatch => {
+		dispatch({
+			type: SHOW_DIALOG
+		});
+	};
+};
+
+export const hideDialog = () => {
+	return dispatch => {
+		dispatch({
+			type: HIDE_DIALOG
+		});
+	};
+};
+
+export const showContentDialog = () => {
+	return dispatch => {
+		dispatch({
+			type: SHOW_CONTENT_DIALOG
+		});
+	};
+};
+
+export const hideContentDialog = () => {
+	return dispatch => {
+		dispatch({
+			type: HIDE_CONTENT_DIALOG
+		});
+	};
+};
+
+export const showImportDialog = () => {
+	return dispatch => {
+		dispatch({
+			type: SHOW_IMPORT_DIALOG
+		});
+	};
+};
+
+export const hideImportDialog = () => {
+	return dispatch => {
+		dispatch({
+			type: HIDE_IMPORT_DIALOG
 		});
 	};
 };
@@ -69,8 +150,11 @@ export function reducer(state = {
 	template: {
 		id: null
 	},
-	templateHTML: ''
+	templateHTML: '',
+	showDialog: false,
+	showContentDialog: true
 }, action) {
+	console.log(state);
 	switch (action.type) {
 	case FETCH_SUCCESS:
 		return Object.assign({}, state, {
@@ -80,6 +164,11 @@ export function reducer(state = {
 		return Object.assign({}, state, {
 			version: action.version,
 			templates: []
+		});
+		break;
+	case ADD_RELEASE:
+		return Object.assign({}, state, {
+			list: state.list.concat(action.data)
 		});
 		break;
 	case PICK_VERSION_SUCCESS:
@@ -98,6 +187,26 @@ export function reducer(state = {
 	case PICK_TEMPLATE_SUCCESS:
 		return Object.assign({}, state, {
 			templateHTML: action.data
+		});
+		break;
+	case SHOW_DIALOG:
+		return Object.assign({}, state, {
+			showDialog: true
+		});
+		break;
+	case HIDE_DIALOG:
+		return Object.assign({}, state, {
+			showDialog: false
+		});
+		break;
+	case SHOW_CONTENT_DIALOG:
+		return Object.assign({}, state, {
+			showContentDialog: true
+		});
+		break;
+	case HIDE_CONTENT_DIALOG:
+		return Object.assign({}, state, {
+			showContentDialog: false
 		});
 		break;
 	default:

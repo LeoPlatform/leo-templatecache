@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <base href="${leo.baseHref}" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script type="text/javascript" src="${leo.static.url}js/aws-sdk-custombuild2.259.1.js"></script>
+    <script type="text/javascript" src="${leo.static.uri}js/aws-sdk-custombuild2.259.1.js"></script>
     <script type="text/javascript" src="${leo.static.uri}js/leoApiGateway.js"></script>
 
     <script type="text/javascript">
@@ -17,7 +17,12 @@
 		});
     </script>
     <link rel="stylesheet" href="${leo.static.uri}css/index.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script src="${leo.static.uri}js/common.js"></script>
+
+
+
     <script src="${leo.static.uri}js/index.js"></script>
 </head>
 <body>

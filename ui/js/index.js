@@ -11,7 +11,7 @@ import {
 } from 'redux';
 import thunkMiddleware from 'redux-thunk';
 
-import reducer from './reducer.js';
+import reducer from './reducers/index.js';
 import Main from './components/main.jsx';
 //Set up CSS required
 import "../css/main.less";

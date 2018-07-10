@@ -6,10 +6,10 @@ import {
 	reducer as version
 } from "../ducks/versions.js";
 import {
-	reducer as navigation
-} from "../ducks/navigation.js";
+	reducer as market
+} from "../ducks/market.js";
 
 export default combineReducers({
 	version,
-	navigation
+	market
 });

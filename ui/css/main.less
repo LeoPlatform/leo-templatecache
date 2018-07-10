@@ -1,85 +1,50 @@
-@import "normalize.css";
-
 html, body, div#root {
+  margin: 0;
   height: 100%;
   overflow: hidden;
   background: url(../images/test.png);
 }
 
 div#root {
-	header {
-		padding-top: 10px;
-		padding-left: 20px;
-		a {
-			display: block;
-			float: left;
-			padding: 20px;
-			height: 50px;
-			cusor: pointer;
-			&:hover {
-				background: white;
-				opacity: .6
-			}
-			&.selected {
-				background: white;
-			}
-		}
-		height: 60px;
-		background: lightblue;
-		display: block;
-		overflow: hidden;
-	}
-	div.view {
-		display: block;
-		float: right;
-		width: 75%;
-		margin-top: 10px;
-		margin-right: 20px;
-		height: calc(~"100% - 130px");
-		>iframe {
-			width: 100%;
-			height: 100%;
-			border: 0px;
-		}	
-		>div {
-			text-align: right;
-			margin-bottom: 10px;
-			label {
-				margin-right: 20px;
-			}
-		}
-	}
-	
-	>div.select {
-		width: 20%;
+	>div {
 		height: 100%;
-		h3 {
-			text-align: center;
-		}
-		div {
-			height: 50%;
-			table {
+		margin: 0;
+
+		>div.view {
+			display: block;
+			float: right;
+			width: 65%;
+			margin-top: 10px;
+			margin-right: 20px;
+			height: calc(~"100% - 130px");
+			>iframe {
 				width: 100%;
-				border-spacing: 0px;
-				border-collapse: collapse;
-				thead {
-					background: #ccc;
+				height: 100%;
+				border: 0px;
+			}	
+			>div {
+				text-align: center;
+				margin-bottom: 10px;
+				label {
+					margin-right: 20px;
+					margin-left: 90px;
 				}
-				tbody {
-					tr:nth-child(even) {
-						background: #eee;
-					}
-					tr:hover {
-						background: #eff;
-						cursor: pointer;
-					}
-					tr.selected, tr.selected:hover {
-						background: #dff;
-					}
-				}
-				td,th {
-					padding: 10px 10px;
-				}
+			}
+		}
+		
+		>div.select {
+			width: 30%;
+			height: 100%;
+			max-width: 720px;
+			overflow: hidden;
+			h3 {
+				text-align: center;
+			}
+
+			>div {
+				width: 33%;
+				height: 100%;
+				float: left;
 			}
 		}
 	}
