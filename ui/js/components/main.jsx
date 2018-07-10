@@ -30,7 +30,7 @@ class ProductList extends React.Component {
 					<Tab label="United Kingdoom" value="UK"/>
 					<Tab label="New Zealand" value="NZ"/>
 					<Tab label="Germany" value="DE"/>
-					<Tab label="Spain" value="SP"/>
+					<Tab label="Spain" value="ES"/>
 				</Tabs>
 		 </Toolbar>
          </Typography>
@@ -39,17 +39,6 @@ class ProductList extends React.Component {
     ];
   }
 };
-
-
-// let App = (props) => {
-// 	console.log(props);
-// 	props.dispatch(watch());
-// 	return [
-//         <Header key='1' />,
-//         'HELLO',
-//         <Footer key='2' />
-//     ];
-// };
 
 export default connect(state=>({
 	versions: state.version.list,

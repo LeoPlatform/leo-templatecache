@@ -8,6 +8,10 @@ import {
 import MenuList from '@material-ui/core/MenuList';
 import MenuItem from '@material-ui/core/MenuItem';
 
+import Icon from '@material-ui/core/Icon';
+import IconButton from '@material-ui/core/IconButton';
+import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListSubheader from '@material-ui/core/ListSubheader';
@@ -33,7 +37,7 @@ import SetContentDialog from './setContentDialog.jsx';
 
 import moment from 'moment';
 
-import {changeVersion, changeTemplate,changeTemplateOptions, createRelease, showDialog, showImportDialog} from '../../ducks/versions.js';
+import {changeVersion, changeTemplate,changeTemplateOptions, createRelease, showDialog, showContentDialog, showImportDialog} from '../../ducks/versions.js';
 
 import { withStyles } from '@material-ui/core/styles';
 const styles = theme => ({
@@ -97,14 +101,37 @@ class VersionTable extends React.Component {
                 <div>
                     <h3>Specify Content</h3>
                     <SetContentDialog></SetContentDialog>
-                    Default (the page everyone will see unless specified otherwise) <Button variant="contained" color="primary" className={classes.button} onClick={()=>this.props.showImportDialog()}>
-                      Import
-                    </Button>
+                    Import from drupal <CloudUploadIcon  />
                       <ul>
-
-                        <li>Some Languages  edit                   </li>
+                        {this.props.languages.map(l=>{
+                          return <li onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {market: this.props.market, locale: l})}>{l} <IconButton size="small"  color="secondary" aria-label="edit" className={classes.button} onClick={this.props.showContentDialog}><Icon>edit_icon</Icon></IconButton></li>
+                        })}
                       </ul>
+
                     <FormControlLabel control={<Checkbox checked={false} onChange={()=>{}} value="checkedB"/>} label="Specify pages for Customer/Presenter"/>
+                    Customer Version<br />
+                      Import from drupal <CloudUploadIcon  />
+                      <ul>
+                        {this.props.languages.map(l=>{
+                          return <li onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {auth: "customer", market: this.props.market, locale: l})}>{l} <IconButton size="small"  color="secondary" aria-label="edit" className={classes.button} onClick={this.props.showContentDialog}><Icon>edit_icon</Icon></IconButton></li>
+                        })}
+                      </ul>
+
+                      Presenter Version<br />
+                      Import from drupal <CloudUploadIcon  />
+                      <ul>
+                        {this.props.languages.map(l=>{
+                          return <li onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {auth: "presenter", market: this.props.market, locale: l})}>{l} <IconButton size="small"  color="secondary" aria-label="edit" className={classes.button} onClick={this.props.showContentDialog}><Icon>edit_icon</Icon></IconButton></li>
+                        })}
+                      </ul>
+
+
+
+                    <Button variant="contained" color="primary" className={classes.button} onClick={()=>this.props.saveContent()}>
+                      Save Content
+                    </Button>      
+
+
                 </div>
             </div>
 		];
@@ -117,7 +144,8 @@ export default connect(state => ({
     template: state.version.template,
     templateOptions: state.version.templateOptions,
     templateHTML: state.version.templateHTML,
-    templates: state.version.templates
+    templates: state.version.templates,
+    languages: state.market.languages
 }), (dispatch, props) => ({
 	versionSelect: (version) => {
         dispatch(changeVersion(version));
@@ -136,5 +164,8 @@ export default connect(state => ({
     },
     showImportDialog: ()=>{
       dispatch(showImportDialog());
+    },
+    saveContent: ()=>{
+      alert("TO DO STILL");
     }
 }))(withStyles(styles)(VersionTable));

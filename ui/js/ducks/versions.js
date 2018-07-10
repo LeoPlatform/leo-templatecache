@@ -152,7 +152,7 @@ export function reducer(state = {
 	},
 	templateHTML: '',
 	showDialog: false,
-	showContentDialog: true
+	showContentDialog: false
 }, action) {
 	console.log(state);
 	switch (action.type) {
