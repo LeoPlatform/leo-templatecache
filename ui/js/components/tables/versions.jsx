@@ -1,6 +1,4 @@
-import React, {
-	Component
-} from 'react';
+import React from 'react';
 import {
 	connect
 } from 'react-redux';
@@ -57,13 +55,14 @@ class VersionTable extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-      dialog: false
-    };
+            dialog: false,
+            checked: false
+        };
 	}
 	render() {
         const { classes } = this.props;
+        let unorderedListStyle = {listStyle: 'none', paddingLeft: '20px'};
 
-        console.log(classes);
 		return [
             <div className="view" key="view">
                 <iframe src={"data:text/html;charset=utf-8,"+encodeURI(this.props.templateHTML)}>
@@ -79,9 +78,9 @@ class VersionTable extends React.Component {
                     <CreateVersion></CreateVersion>    
                     <MenuList id="versionlist" component="div" >
                      {this.props.versions.map((v,i)=>{
-                      console.log(v);
+                      let isSelected = v.id === this.props.version.id;
                          return [i==0?null:<Divider />, 
-                         <MenuItem button className={classes.menuItem} onClick={()=>this.props.versionSelect(v)}>
+                         <MenuItem button selected={isSelected} onClick={()=>this.props.versionSelect(v)}>
                             <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={moment(v.ts).format('LLLL')} secondary={v.id}/>
                          </MenuItem>]
                     })}
@@ -91,54 +90,63 @@ class VersionTable extends React.Component {
                     <h3>Choose a Path</h3>
                     <MenuList id="versionlist" component="div" >
                      {this.props.templates.map((t,i)=>{
-                         return [i==0?null:<Divider />, 
-                         <MenuItem button className={classes.menuItem} onClick={()=>this.props.templateSelect(t, this.props.version,this.props.templateOptions)}>
+                         let isSelected = t.id === this.props.template.id && this.props.openContent;
+                         return [i==0?null:<Divider />,
+                         <MenuItem button selected={isSelected} onClick={()=>this.props.templateSelect(t, this.props.version,this.props.templateOptions)}>
                             <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={t.id} secondary={t.v===null?'Unchanged':''}/>
                          </MenuItem>]
                     })}
                     </MenuList>
                 </div>
-                <div>
+                <div className={"test"}>
                     <h3>Specify Content</h3>
-                    <SetContentDialog></SetContentDialog>
-                    Import from drupal <CloudUploadIcon  />
-                      <ul>
-                        {this.props.languages.map(l=>{
-                          return <li onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {market: this.props.market, locale: l})}>{l} <IconButton size="small"  color="secondary" aria-label="edit" className={classes.button} onClick={this.props.showContentDialog}><Icon>edit_icon</Icon></IconButton></li>
-                        })}
-                      </ul>
+                    {
+                        this.props.openContent ?
+                            <div>
+                                <SetContentDialog></SetContentDialog>
+                                Import from drupal <CloudUploadIcon  />
+                                <ul style={unorderedListStyle}>
+                                    {this.props.languages.map(l=>{
+                                        return <li onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {market: this.props.market, locale: l})}><a href="javascript:void(0)">{l}</a> <IconButton size="small"  color="secondary" aria-label="edit" className={classes.button} onClick={this.props.showContentDialog}><Icon>edit_icon</Icon></IconButton></li>
+                                    })}
+                                </ul>
+                                <FormControlLabel control={<Checkbox checked={this.state.checked} onChange={()=>{this.setState({checked:!this.state.checked})}} value="checkedB"/>} label="Specify pages for Customer/Presenter"/>
+                                {
+                                    this.state.checked ?
+                                        <div>
+                                            Customer Version<br />
+                                            Import from drupal <CloudUploadIcon  />
+                                            <ul style={unorderedListStyle}>
+                                                {this.props.languages.map(l=>{
+                                                    return <li onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {auth: "customer", market: this.props.market, locale: l})}><a href="javascript:void(0)">{l}</a> <IconButton size="small"  color="secondary" aria-label="edit" className={classes.button} onClick={this.props.showContentDialog}><Icon>edit_icon</Icon></IconButton></li>
+                                                })}
+                                            </ul>
 
-                    <FormControlLabel control={<Checkbox checked={false} onChange={()=>{}} value="checkedB"/>} label="Specify pages for Customer/Presenter"/>
-                    Customer Version<br />
-                      Import from drupal <CloudUploadIcon  />
-                      <ul>
-                        {this.props.languages.map(l=>{
-                          return <li onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {auth: "customer", market: this.props.market, locale: l})}>{l} <IconButton size="small"  color="secondary" aria-label="edit" className={classes.button} onClick={this.props.showContentDialog}><Icon>edit_icon</Icon></IconButton></li>
-                        })}
-                      </ul>
+                                            Presenter Version<br />
+                                            Import from drupal <CloudUploadIcon  />
+                                            <ul style={unorderedListStyle}>
+                                                {this.props.languages.map(l=>{
+                                                    return <li onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {auth: "presenter", market: this.props.market, locale: l})}><a href="javascript:void(0)">{l}</a> <IconButton size="small"  color="secondary" aria-label="edit" className={classes.button} onClick={this.props.showContentDialog}><Icon>edit_icon</Icon></IconButton></li>
+                                                })}
+                                            </ul>
+                                        </div>
+                                        : false
 
-                      Presenter Version<br />
-                      Import from drupal <CloudUploadIcon  />
-                      <ul>
-                        {this.props.languages.map(l=>{
-                          return <li onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {auth: "presenter", market: this.props.market, locale: l})}>{l} <IconButton size="small"  color="secondary" aria-label="edit" className={classes.button} onClick={this.props.showContentDialog}><Icon>edit_icon</Icon></IconButton></li>
-                        })}
-                      </ul>
-
-
-
-                    <Button variant="contained" color="primary" className={classes.button} onClick={()=>this.props.saveContent()}>
-                      Save Content
-                    </Button>      
-
-
+                                }
+                                <Button variant="contained" color="primary" className={classes.button} onClick={()=>this.props.saveContent()}>
+                                    Save Content
+                                </Button>
+                            </div>
+                            : false
+                    }
                 </div>
             </div>
 		];
 	}
 }
 export default connect(state => ({
-  market: state.market.id,
+    market: state.market.id,
+    openContent: state.version.openContent || false,
 	versions: state.version.list,
     version: state.version.version,
     template: state.version.template,

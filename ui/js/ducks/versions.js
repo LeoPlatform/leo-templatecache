@@ -26,7 +26,6 @@ const HIDE_IMPORT_DIALOG = 'VERSIONS_HIDE_IMPORT_DIALOG';
 export const watch = () => {
 	return dispatch =>
 		$.get(`api/version`, response => {
-			console.log("response", response);
 			dispatch({
 				type: FETCH_SUCCESS,
 				data: response
@@ -154,7 +153,6 @@ export function reducer(state = {
 	showDialog: false,
 	showContentDialog: false
 }, action) {
-	console.log(state);
 	switch (action.type) {
 	case FETCH_SUCCESS:
 		return Object.assign({}, state, {
@@ -163,7 +161,8 @@ export function reducer(state = {
 	case PICK_VERSION_BEGIN:
 		return Object.assign({}, state, {
 			version: action.version,
-			templates: []
+			templates: [],
+			openContent: false
 		});
 		break;
 	case ADD_RELEASE:
@@ -181,8 +180,9 @@ export function reducer(state = {
 		return Object.assign({}, state, {
 			template: action.template,
 			templateOptions: action.options,
-			templateHTML: 'Please wait...Loading'
-		});
+			templateHTML: 'Please wait...Loading',
+            openContent: true
+        });
 		break;
 	case PICK_TEMPLATE_SUCCESS:
 		return Object.assign({}, state, {
