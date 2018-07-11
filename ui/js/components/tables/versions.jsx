@@ -62,6 +62,8 @@ class VersionTable extends React.Component {
 	render() {
         const { classes } = this.props;
         let unorderedListStyle = {listStyle: 'none', paddingLeft: '20px'};
+        let listItemOverrides = {height: '100%', whiteSpace: 'normal'};
+        let specifyContentPadding = {paddingLeft: '12px'};
 
 		return [
             <div className="view" key="view">
@@ -80,7 +82,7 @@ class VersionTable extends React.Component {
                      {this.props.versions.map((v,i)=>{
                       let isSelected = v.id === this.props.version.id;
                          return [i==0?null:<Divider />, 
-                         <MenuItem button selected={isSelected} onClick={()=>this.props.versionSelect(v)}>
+                         <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.versionSelect(v)}>
                             <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={moment(v.ts).format('LLLL')} secondary={v.id}/>
                          </MenuItem>]
                     })}
@@ -92,7 +94,7 @@ class VersionTable extends React.Component {
                      {this.props.templates.map((t,i)=>{
                          let isSelected = t.id === this.props.template.id && this.props.openContent;
                          return [i==0?null:<Divider />,
-                         <MenuItem button selected={isSelected} onClick={()=>this.props.templateSelect(t, this.props.version,this.props.templateOptions)}>
+                         <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.templateSelect(t, this.props.version,this.props.templateOptions)}>
                             <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={t.id} secondary={t.v===null?'Unchanged':''}/>
                          </MenuItem>]
                     })}
@@ -102,7 +104,7 @@ class VersionTable extends React.Component {
                     <h3>Specify Content</h3>
                     {
                         this.props.openContent ?
-                            <div>
+                            <div style={specifyContentPadding}>
                                 <SetContentDialog></SetContentDialog>
                                 Import from drupal <CloudUploadIcon  />
                                 <ul style={unorderedListStyle}>
