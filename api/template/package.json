@@ -20,7 +20,12 @@
 			"role": null,
 			"memory": 256,
 			"timeout": 10,
-			"trigger": "orders"
+			"trigger": "orders",
+			"VPCConfig": {
+				"subnetIds": {
+					"Ref": "Enviornment"
+				}
+			}
 		}
 	},
 	"keywords": [],

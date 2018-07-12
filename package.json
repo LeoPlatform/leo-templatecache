@@ -24,6 +24,7 @@
 		"babel-preset-react": "^6.24.1",
 		"leo-auth": "^2.0.1",
 		"leo-aws": "^1.2.0",
+		"leo-cache": "^1.0.0",
 		"leo-config": "^1.0.4",
 		"leo-sdk": "^2.0.0",
 		"lodash.union": "^4.6.0",

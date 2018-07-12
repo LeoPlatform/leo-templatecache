@@ -1,8 +1,9 @@
 "use strict";
 // var request = require("leo-auth");
-let config = require("leo-config").bootstrap(require("../../leo_config.js"));
+let config = require("leo-config");
 
-console.log(config);
+let leoaws = require("leo-aws");
+const cache = require("leo-aws/utils/cache.js");
 
 const union = require("lodash.union");
 var querystring = require("querystring");
@@ -10,21 +11,10 @@ const crypto = require("crypto");
 const zlib = require("zlib");
 
 const templateLib = require("../../lib/template.js");
-// console.log(fallbacks.locale);
-// console.log(fallbacks.auth);
-// console.log(variations);
-
-let templateVersionCache = null;
-let template = null;
-let versionCache = null;
 
 exports.handler = require("leo-sdk/wrappers/resource")(async (event, context, callback) => {
-	console.log(config);
-	let leoaws = await config.leoaws;
-	// let dynamodb = leoaws.dynamodb;
-	let settings = Object.assign({
+	let dynamodb = leoaws.dynamodb;
 
-	}, event);
 	// let user = await request.getUser(event);
 	//Categorize what they are trying to do.
 
@@ -33,30 +23,22 @@ exports.handler = require("leo-sdk/wrappers/resource")(async (event, context, ca
 	// 	lrn: 'lrn:leo:botmon:::cron',
 	// 	action: event.httpMethod == "POST" ? "PUTVersion" : "GetVersion"
 	// });
+
 	console.time("done");
 	if (event.httpMethod == "GET") {
-		async function getVersions() {
-			if (!versionCache) {
-				versionCache = await dynamodb.scan(config.resources.Versions);
-			}
-			return versionCache;
-		}
-		async function getTemplateVersions(id) {
-			if (!templateVersionCache) {
-				templateVersionCache = await dynamodb.query({
-					TableName: config.resources.TemplateVersions,
-					IndexName: "list",
-					KeyConditionExpression: "id = :id",
-					ExpressionAttributeValues: {
-						":id": id
-					},
-					"ReturnConsumedCapacity": 'TOTAL'
-				});
-			}
-			return templateVersionCache;
-		}
 		let pageId = event.pathParameters.id;
-		let [versions, templateVersions] = await Promise.all([getVersions(), getTemplateVersions(pageId)]);
+
+		let versions = await cache.get("VERSIONS", () => dynamodb.scan(config.resources.Versions));
+		let templateVersions = await cache.get("TEMPLATE_VERSIONS", () => dynamodb.query({
+			TableName: config.resources.TemplateVersions,
+			IndexName: "list",
+			KeyConditionExpression: "id = :id",
+			ExpressionAttributeValues: {
+				":id": pageId
+			},
+			"ReturnConsumedCapacity": 'TOTAL'
+		}));
+		console.log(pageId, versions, templateVersions);
 
 		let availableVersions = templateVersions.reduce((a, e) => {
 			a[e.v] = true;
@@ -85,9 +67,7 @@ exports.handler = require("leo-sdk/wrappers/resource")(async (event, context, ca
 			});
 		}
 
-		if (!template) {
-			template = templateLib.getTemplateVersion(pageId, latestVersion.id);
-		}
+		let template = await cache.get(`TEMPLATE_${pageId}_${latestVersion.id}`, () => templateLib.getTemplateVersion(pageId, latestVersion.id), 1 * 24 * 60 * 60 * 1000);
 		console.timeEnd("done");
 		callback(null, template);
 	} else if (event.httpMethod == "POST") {
