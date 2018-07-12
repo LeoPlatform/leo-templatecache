@@ -24,18 +24,17 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 
+import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
 import Typography from '@material-ui/core/Typography';
 import Toolbar from '@material-ui/core/Toolbar';
 
 import CreateVersion from './createVersionDialog.jsx';
-import SetContentDialog from './setContentDialog.jsx';
-
 
 import moment from 'moment';
 
-import {changeVersion, changeTemplate,changeTemplateOptions, createRelease, showDialog, showContentDialog, showImportDialog} from '../../ducks/versions.js';
+import {changeVersion, changeTemplate,changeTemplateOptions, createRelease, showDialog, showContentDialog, showImportDialog, changeTemplateHtml} from '../../ducks/versions.js';
 
 import { withStyles } from '@material-ui/core/styles';
 const styles = theme => ({
@@ -56,18 +55,40 @@ class VersionTable extends React.Component {
 		super(props);
 		this.state = {
             dialog: false,
-            checked: false
+            checked: false,
+            value: 0
         };
 	}
+
 	render() {
         const { classes } = this.props;
+        const { value } = this.state;
         let unorderedListStyle = {listStyle: 'none', paddingLeft: '20px'};
+        let listItemOverrides = {height: '100%', whiteSpace: 'normal'};
+        let specifyContentPadding = {paddingLeft: '12px'};
+        let unorderedListItemPadding = {paddingBottom: '5px'};
+        $('#htmlTextArea').val(this.props.templateHTML)
 
 		return [
             <div className="view" key="view">
-                <iframe src={"data:text/html;charset=utf-8,"+encodeURI(this.props.templateHTML)}>
-
-                </iframe>
+                <AppBar className="appBar" position="static">
+                    <Tabs value={value} onChange={(event, value)=> {this.setState({ value })}}>
+                        <Tab label="Preview" />
+                        <Tab label="Code" />
+                    </Tabs>
+                </AppBar>
+                {value === 0 && <iframe src={"data:text/html;charset=utf-8,"+encodeURI(this.props.templateHTML)}></iframe>}
+                {
+                    value === 1 &&
+                    <div style={{width: '100%', height: '100%'}}>
+                        <textarea id="htmlTextArea" style={{width: '99%', height: '92%'}}>{this.props.templateHTML}</textarea>
+                        <div style={{width:'100%', boxSizing:'border-box', height:'8%',padding:'5px'}}>
+                            <Button variant="contained" color="primary" className={classes.button} onClick={()=>this.props.changeContent($('#htmlTextArea').val(), this.props.template)}>
+                                Change Content
+                            </Button>
+                        </div>
+                    </div>
+                }
             </div>,
             <div className="select" key="versions">
                 <div>
@@ -80,7 +101,7 @@ class VersionTable extends React.Component {
                      {this.props.versions.map((v,i)=>{
                       let isSelected = v.id === this.props.version.id;
                          return [i==0?null:<Divider />, 
-                         <MenuItem button selected={isSelected} onClick={()=>this.props.versionSelect(v)}>
+                         <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.versionSelect(v)}>
                             <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={moment(v.ts).format('LLLL')} secondary={v.id}/>
                          </MenuItem>]
                     })}
@@ -92,7 +113,7 @@ class VersionTable extends React.Component {
                      {this.props.templates.map((t,i)=>{
                          let isSelected = t.id === this.props.template.id && this.props.openContent;
                          return [i==0?null:<Divider />,
-                         <MenuItem button selected={isSelected} onClick={()=>this.props.templateSelect(t, this.props.version,this.props.templateOptions)}>
+                         <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.templateSelect(t, this.props.version,this.props.templateOptions)}>
                             <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={t.id} secondary={t.v===null?'Unchanged':''}/>
                          </MenuItem>]
                     })}
@@ -102,12 +123,11 @@ class VersionTable extends React.Component {
                     <h3>Specify Content</h3>
                     {
                         this.props.openContent ?
-                            <div>
-                                <SetContentDialog></SetContentDialog>
+                            <div style={specifyContentPadding}>
                                 Import from drupal <CloudUploadIcon  />
                                 <ul style={unorderedListStyle}>
                                     {this.props.languages.map(l=>{
-                                        return <li onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {market: this.props.market, locale: l})}><a href="javascript:void(0)">{l}</a> <IconButton size="small"  color="secondary" aria-label="edit" className={classes.button} onClick={this.props.showContentDialog}><Icon>edit_icon</Icon></IconButton></li>
+                                        return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {market: this.props.market, locale: l})}><a href="javascript:void(0)">{l}</a></li>
                                     })}
                                 </ul>
                                 <FormControlLabel control={<Checkbox checked={this.state.checked} onChange={()=>{this.setState({checked:!this.state.checked})}} value="checkedB"/>} label="Specify pages for Customer/Presenter"/>
@@ -118,7 +138,7 @@ class VersionTable extends React.Component {
                                             Import from drupal <CloudUploadIcon  />
                                             <ul style={unorderedListStyle}>
                                                 {this.props.languages.map(l=>{
-                                                    return <li onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {auth: "customer", market: this.props.market, locale: l})}><a href="javascript:void(0)">{l}</a> <IconButton size="small"  color="secondary" aria-label="edit" className={classes.button} onClick={this.props.showContentDialog}><Icon>edit_icon</Icon></IconButton></li>
+                                                    return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {auth: "customer", market: this.props.market, locale: l})}><a href="javascript:void(0)">{l}</a></li>
                                                 })}
                                             </ul>
 
@@ -126,7 +146,7 @@ class VersionTable extends React.Component {
                                             Import from drupal <CloudUploadIcon  />
                                             <ul style={unorderedListStyle}>
                                                 {this.props.languages.map(l=>{
-                                                    return <li onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {auth: "presenter", market: this.props.market, locale: l})}><a href="javascript:void(0)">{l}</a> <IconButton size="small"  color="secondary" aria-label="edit" className={classes.button} onClick={this.props.showContentDialog}><Icon>edit_icon</Icon></IconButton></li>
+                                                    return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect(this.props.template, this.props.version, {auth: "presenter", market: this.props.market, locale: l})}><a href="javascript:void(0)">{l}</a></li>
                                                 })}
                                             </ul>
                                         </div>
@@ -149,6 +169,7 @@ export default connect(state => ({
     openContent: state.version.openContent || false,
 	versions: state.version.list,
     version: state.version.version,
+    tabValue: state.version.tabValue,
     template: state.version.template,
     templateOptions: state.version.templateOptions,
     templateHTML: state.version.templateHTML,
@@ -172,6 +193,9 @@ export default connect(state => ({
     },
     showImportDialog: ()=>{
       dispatch(showImportDialog());
+    },
+    changeContent: (html, template)=>{
+        dispatch(changeTemplateHtml(html, template));
     },
     saveContent: ()=>{
       alert("TO DO STILL");
