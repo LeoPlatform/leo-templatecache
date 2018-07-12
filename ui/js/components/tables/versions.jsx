@@ -113,7 +113,7 @@ class VersionTable extends React.Component {
                      {this.props.templates.map((t,i)=>{
                          let isSelected = t.id === this.props.template.id && this.props.openContent;
                          return [i==0?null:<Divider />,
-                         <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.templateSelect(t, this.props.version,this.props.templateOptions)}>
+                         <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.templateSelect(t, this.props.version,this.props.market)}>
                             <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={t.id} secondary={t.v===null?'Unchanged':''}/>
                          </MenuItem>]
                     })}

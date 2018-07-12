@@ -8,6 +8,22 @@ const querystring = require('querystring');
 
 const siteWrapper = "templates/site_wrapper";
 
+//Known locales
+let locales = {
+	"us": ["en_US", "es_US"],
+	"ca": ["en_CA", "fr_CA"],
+	"au": ["en_AU"],
+	"nz": ["en_NZ"],
+	"uk": ["en_UK"],
+	"mx": ["es_MX", "en_MX"],
+	"de": ["de_DE", "en_DE"],
+	"fr": ["fr_FR", "en_FR"],
+	"es": ["es_ES", "en_ES"],
+	"hk": ["zh_HK", "en_HK"],
+	"it": ["it_IT", "en_IT"],
+	"ie": ["en_IE"]
+};
+
 const sampleData = {
 	anonymous: {
 
@@ -27,31 +43,57 @@ exports.handler = require("leo-sdk/wrappers/resource")(async function (event, co
 
 	let files = JSON.parse(zlib.gunzipSync(new Buffer(template.files, 'base64')));
 
-	let variation = templateLib.createOptionString({
-		locale: event.queryStringParameters.locale,
-		auth: event.queryStringParameters.auth,
+	//let's send back all variations for this market and language
+	let market = (event.queryStringParameters.market || 'US').toLowerCase();
+
+	let variations = {
+		anonymous: {},
+		customer: {},
+		presenter: {}
+	};
+
+	let seen = {};
+
+	locales[market].map(locale => {
+		["anonymous", "customer", "presenter"].forEach(auth => {
+			let variation = templateLib.createOptionString({
+				locale: locale,
+				auth: auth,
+			});
+			let hash = template.map[variation];
+			if (!(hash in seen) && hash in files) {
+				seen[hash] = 1;
+
+				let t = new Buffer(files[hash]).toString("utf-8");
+				let lookup = sampleData[auth];
+				t = t.replace(/(__[^\s]+__)/g, (match) => {
+					return lookup[match];
+				});
+				variations[auth][locale] = t;
+			}
+		});
 	});
 
-	console.log(variation);
-	console.log(template.map);
-	let hash = template.map[variation];
-	let authType = querystring.parse(variation).auth;
-	console.log(hash);
-	let t = new Buffer(files[hash]).toString("utf-8");
+	// console.log(event.pathParameters.id, siteWrapper, event.queryStringParameters.showWrappers == true);
+	// if (event.pathParameters.id !== siteWrapper && event.queryStringParameters.showWrappers == true) {
+	// 	let wrapper = await templateLib.getTemplateVersion(siteWrapper, event.pathParameters.version);
+	// 	let wrapperFiles = JSON.parse(zlib.gunzipSync(new Buffer(wrapper.files, 'base64')));
 
-	event.queryStringParameters.showWrappers = true;
-	console.log(event.pathParameters.id, siteWrapper, event.queryStringParameters.showWrappers == true);
-	if (event.pathParameters.id !== siteWrapper && event.queryStringParameters.showWrappers == true) {
-		let wrapper = await templateLib.getTemplateVersion(siteWrapper, event.pathParameters.version);
-		let wrapperFiles = JSON.parse(zlib.gunzipSync(new Buffer(wrapper.files, 'base64')));
+	// 	let hash = wrapper.map[variation];
+	// 	let w = new Buffer(wrapperFiles[hash]).toString("utf-8");
+	// 	t = w.replace("__CONTENT__", t);
+	// }
 
-		let hash = wrapper.map[variation];
-		let w = new Buffer(wrapperFiles[hash]).toString("utf-8");
-		t = w.replace("__CONTENT__", t);
-	}
-	let lookup = sampleData[authType];
-	t = t.replace(/(__[^\s]+__)/g, (match) => {
-		return lookup[match];
+	zlib.gzip(JSON.stringify(variations), (err, gzip) => {
+		callback(null, {
+			statusCode: 200,
+			headers: {
+				'Content-Type': 'application/json',
+				'Content-Encoding': 'gzip'
+			},
+			body: gzip.toString("base64"),
+			isBase64Encoded: true
+		});
 	});
-	callback(null, t);
+
 });

@@ -68,14 +68,13 @@ export const createRelease = (timestamp, name) => {
 	}
 };
 
-export const changeTemplate = (v, t, options) => {
+export const changeTemplate = (v, t, market) => {
 	return dispatch => {
 		dispatch({
 			type: PICK_TEMPLATE_BEGIN,
-			template: t,
-			options: options
+			template: t
 		});
-		$.get(`api/templateVersion/${v.id}/${t.id}`, options, response => {
+		$.get(`api/templateVersion/${v.id}/${t.id}?market=${market}`, response => {
 			dispatch({
 				type: PICK_TEMPLATE_SUCCESS,
 				data: response
@@ -86,13 +85,13 @@ export const changeTemplate = (v, t, options) => {
 
 export const changeTemplateHtml = (html, template) => {
 	window.alert('Content Changed');
-    return dispatch => {
-        dispatch({
-            type: CHANGE_TEMPLATE_HTML,
-            template: template,
+	return dispatch => {
+		dispatch({
+			type: CHANGE_TEMPLATE_HTML,
+			template: template,
 			html: html
-        });
-    };
+		});
+	};
 };
 
 export const showDialog = () => {
@@ -189,13 +188,13 @@ export function reducer(state = {
 			template: action.template,
 			templateOptions: action.options,
 			templateHTML: 'Please wait...Loading',
-            openContent: true
-        });
+			openContent: true
+		});
 		break;
 	case PICK_TEMPLATE_SUCCESS:
 		return Object.assign({}, state, {
 			templateHTML: action.data
-        });
+		});
 		break;
 	case SHOW_DIALOG:
 		return Object.assign({}, state, {
@@ -219,7 +218,7 @@ export function reducer(state = {
 		break;
 	case CHANGE_TEMPLATE_HTML:
 		return Object.assign({}, state, {
-            templateHTML: action.html
+			templateHTML: action.html
 		});
 		break;
 	default:
