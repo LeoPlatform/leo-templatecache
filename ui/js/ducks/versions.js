@@ -6,6 +6,7 @@ const PICK_VERSION_SUCCESS = 'VERSIONS_PICK_VERSION';
 
 const PICK_TEMPLATE_BEGIN = 'VERSIONS_PICK_TEMPLATE_BEGIN';
 const PICK_TEMPLATE_SUCCESS = 'VERSIONS_PICK_TEMPLATE';
+const PICK_TEMPLATE_CHANGED = 'VERSIONS_PICK_CHANGED';
 
 const FETCH_TEMPLATES = 'VERSIONS_FETCH_TEMPLATES';
 
@@ -68,30 +69,60 @@ export const createRelease = (timestamp, name) => {
 	}
 };
 
-export const changeTemplate = (v, t, market) => {
+export const initialTemplate = (v, t, market) => {
+    return dispatch => {
+        dispatch({
+            type: PICK_TEMPLATE_BEGIN,
+            template: t
+        });
+        $.get(`api/templateVersion/${v.id}/${t.id}?market=${market}`, response => {
+        	// Change checkbox to have this state
+        	let checkedBox = false;
+        	Object.keys(response).map((key) => {
+        		if (Object.keys(response[key]).length !== 0) {
+                    checkedBox = true
+				}
+			});
+            dispatch({
+                type: PICK_TEMPLATE_SUCCESS,
+                data: response,
+            });
+        });
+    };
+};
+
+export const changeTemplate = (auth, locale) => {
+	return dispatch => {
+        dispatch({
+            type: PICK_TEMPLATE_CHANGED,
+            auth: '',
+            locale: ''
+        });
+		setTimeout(() => dispatch({
+			type: PICK_TEMPLATE_CHANGED,
+			auth: auth,
+			locale: locale
+		}), 100);
+	};
+};
+
+export const changeTemplateHtml = (html) => {
 	return dispatch => {
 		dispatch({
-			type: PICK_TEMPLATE_BEGIN,
-			template: t
-		});
-		$.get(`api/templateVersion/${v.id}/${t.id}?market=${market}`, response => {
-			dispatch({
-				type: PICK_TEMPLATE_SUCCESS,
-				data: response
-			});
+			type: CHANGE_TEMPLATE_HTML,
+			html: html
 		});
 	};
 };
 
-export const changeTemplateHtml = (html, template) => {
-	window.alert('Content Changed');
-	return dispatch => {
-		dispatch({
-			type: CHANGE_TEMPLATE_HTML,
-			template: template,
-			html: html
-		});
-	};
+export const saveAllContent = (saveObject) => {
+	// TO DO SAVE STUFF WOHOO
+	console.log(saveObject);
+    return dispatch => {
+        dispatch({
+            type: ''
+        });
+    };
 };
 
 export const showDialog = () => {
@@ -188,12 +219,26 @@ export function reducer(state = {
 			template: action.template,
 			templateOptions: action.options,
 			templateHTML: 'Please wait...Loading',
-			openContent: true
-		});
+			openContent: true,
+            saveContentButton: false
+        });
 		break;
 	case PICK_TEMPLATE_SUCCESS:
+		let key = Object.keys(action.data.anonymous)[0];
+		let auth = Object.keys(action.data)[0];
+		let html = action.data.anonymous[key];
 		return Object.assign({}, state, {
-			templateHTML: action.data
+			templateApiInfo: action.data,
+			templateHTML: html,
+            locale: key,
+            auth: auth
+		});
+		break;
+	case PICK_TEMPLATE_CHANGED:
+		return Object.assign({}, state, {
+            templateHTML: state.templateApiInfo && state.templateApiInfo[action.auth] && state.templateApiInfo[action.auth][action.locale] || 'No content',
+			locale: action.locale,
+			auth: action.auth
 		});
 		break;
 	case SHOW_DIALOG:
@@ -217,11 +262,16 @@ export function reducer(state = {
 		});
 		break;
 	case CHANGE_TEMPLATE_HTML:
+		state.templateApiInfo[state.auth][state.locale] = action.html;
 		return Object.assign({}, state, {
-			templateHTML: action.html
-		});
+			templateHTML: action.html,
+            templateApiInfo: state.templateApiInfo,
+			saveContentButton: true
+        });
 		break;
 	default:
 		return state;
 	}
 }
+
+
