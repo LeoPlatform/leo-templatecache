@@ -34,7 +34,7 @@ import CreateVersion from './createVersionDialog.jsx';
 
 import moment from 'moment';
 
-import {changeVersion, changeTemplate, createRelease, showDialog, showContentDialog, changeTemplateHtml, initialTemplate, saveAllContent} from '../../ducks/versions.js';
+import {changeVersion, changeTemplate, createRelease, showDialog, showContentDialog, changeTemplateHtml, initialTemplate, saveAllContent, specifyContentCheckBox} from '../../ducks/versions.js';
 
 import { withStyles } from '@material-ui/core/styles';
 const styles = theme => ({
@@ -55,7 +55,6 @@ class VersionTable extends React.Component {
 		super(props);
 		this.state = {
             dialog: false,
-            checked: false,
             value: 0
         };
 	}
@@ -67,6 +66,8 @@ class VersionTable extends React.Component {
         let listItemOverrides = {height: '100%', whiteSpace: 'normal'};
         let specifyContentPadding = {paddingLeft: '12px'};
         let unorderedListItemPadding = {paddingBottom: '5px'};
+        let anchorStyle = {textDecoration: 'none'};
+        let cloudIconStyle = {top: '5px', left: '1px', position: 'relative'};
         $('#htmlTextArea').val(this.props.templateHTML);
 
 		return [
@@ -83,7 +84,7 @@ class VersionTable extends React.Component {
                     <div style={{width: '100%', height: '100%'}}>
                         <textarea id="htmlTextArea" style={{width: '99%', height: '92%'}}>{this.props.templateHTML}</textarea>
                         <div style={{width:'100%', boxSizing:'border-box', height:'8%',padding:'5px'}}>
-                            <Button variant="contained" color="primary" className={classes.button} onClick={()=>this.props.changeContent($('#htmlTextArea').val())}>
+                            <Button variant="contained" color="primary" className={classes.button} onClick={()=>this.props.changeContent($('#htmlTextArea').val(), this.props.languages)}>
                                 Change Content
                             </Button>
                         </div>
@@ -113,7 +114,7 @@ class VersionTable extends React.Component {
                      {this.props.templates.map((t,i)=>{
                          let isSelected = t.id === this.props.template.id && this.props.openContent;
                          return [i==0?null:<Divider />,
-                         <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.initialTemplate(t, this.props.version,this.props.market)}>
+                         <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.initialTemplate(t, this.props.version,this.props.market, this.props.languages)}>
                             <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={t.id} secondary={t.v===null?'Unchanged':''}/>
                          </MenuItem>]
                     })}
@@ -124,29 +125,56 @@ class VersionTable extends React.Component {
                     {
                         this.props.openContent ?
                             <div style={specifyContentPadding}>
-                                Import from drupal <CloudUploadIcon  />
+                                Import from drupal <CloudUploadIcon style={cloudIconStyle}/>
                                 <ul style={unorderedListStyle}>
                                     {this.props.languages.map(l =>{
-                                        return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('anonymous', l)}><a href="javascript:void(0)">{l}</a></li>
+                                        let itemContent = this.props.templateApiInfo && this.props.templateApiInfo['anonymous'] && this.props.templateApiInfo['anonymous'][l];
+                                        var isChanged = false;
+                                        anchorStyle = {textDecoration: 'none'};
+                                        if (itemContent === undefined) {
+                                            anchorStyle = {color:'gray', textDecoration: 'none'};
+                                        }
+                                        if (this.props.changed && this.props.changed['anonymous'] && this.props.changed['anonymous'].indexOf(l) !== -1) {
+                                            isChanged = true
+                                        }
+                                        return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('anonymous', l)}><a style={anchorStyle} href="javascript:void(0)">{isChanged ? `*${l}`: l}</a></li>
                                     })}
                                 </ul>
-                                <FormControlLabel control={<Checkbox checked={this.state.checked} onChange={()=>{this.setState({checked:!this.state.checked})}} value="checkedB"/>} label="Specify pages for Customer/Presenter"/>
+                                <FormControlLabel control={<Checkbox checked={this.props.checkboxCheck === true ? true : false} onChange={()=>{this.props.changeCheckbox(this.props.checkboxCheck)}} value="checkedB"/>} label="More Content"/>
                                 {
-                                    this.state.checked ?
+                                    this.props.checkboxCheck ?
                                         <div>
-                                            Customer Version<br />
-                                            Import from drupal <CloudUploadIcon  />
+                                            <b>Customer Version</b><br />
+                                            Import from drupal <CloudUploadIcon style={cloudIconStyle}/>
                                             <ul style={unorderedListStyle}>
                                                 {this.props.languages.map(l=>{
-                                                    return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('customer', l)}><a href="javascript:void(0)">{l}</a></li>
+                                                    let itemContent = this.props.templateApiInfo && this.props.templateApiInfo['customer'] && this.props.templateApiInfo['customer'][l];
+                                                    var isChanged = false;
+                                                    anchorStyle = {textDecoration: 'none'};
+                                                    if (itemContent === undefined) {
+                                                        anchorStyle = {color:'gray', textDecoration: 'none'};
+                                                    }
+                                                    if (this.props.changed && this.props.changed['customer'] && this.props.changed['customer'].indexOf(l) !== -1) {
+                                                        isChanged = true
+                                                    }
+                                                    return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('customer', l)}><a style={anchorStyle} href="javascript:void(0)">{isChanged ? `*${l}`: l}</a></li>
                                                 })}
                                             </ul>
 
-                                            Presenter Version<br />
-                                            Import from drupal <CloudUploadIcon  />
+                                            <b>Presenter Version</b><br />
+                                            Import from drupal <CloudUploadIcon style={cloudIconStyle}/>
                                             <ul style={unorderedListStyle}>
                                                 {this.props.languages.map(l=>{
-                                                    return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('presenter', l)}><a href="javascript:void(0)">{l}</a></li>
+                                                    let itemContent = this.props.templateApiInfo && this.props.templateApiInfo['presenter'] && this.props.templateApiInfo['presenter'][l];
+                                                    var isChanged = false;
+                                                    anchorStyle = {textDecoration: 'none'};
+                                                    if (itemContent === undefined) {
+                                                        anchorStyle = {color:'gray', textDecoration: 'none'};
+                                                    }
+                                                    if (this.props.changed && this.props.changed['presenter'] && this.props.changed['presenter'].indexOf(l) !== -1) {
+                                                        isChanged = true
+                                                    }
+                                                    return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('presenter', l)}><a style={anchorStyle} href="javascript:void(0)">{isChanged ? `*${l}`: l}</a></li>
                                                 })}
                                             </ul>
                                         </div>
@@ -166,6 +194,8 @@ class VersionTable extends React.Component {
 }
 export default connect(state => ({
     auth: state.version.auth,
+    checkboxCheck: state.version.checkboxCheck,
+    changed: state.version.changed,
     locale: state.version.locale,
     market: state.market.id,
     openContent: state.version.openContent || false,
@@ -183,8 +213,8 @@ export default connect(state => ({
 	versionSelect: (version) => {
         dispatch(changeVersion(version));
 	},
-    initialTemplate: (template,version, options) => {
-        dispatch(initialTemplate(version, template, options));
+    initialTemplate: (template,version, options, languages) => {
+        dispatch(initialTemplate(version, template, options, languages));
     },
     templateSelect: (auth, locale) => {
         dispatch(changeTemplate(auth, locale));
@@ -192,14 +222,17 @@ export default connect(state => ({
     createRelease: ()=>{
       dispatch(createRelease("Another test", Date.now()));
     },
+    changeCheckbox: (checkboxCheck)=>{
+        dispatch(specifyContentCheckBox(checkboxCheck));
+    },
     showDialog: ()=>{
       dispatch(showDialog());
     },
     showContentDialog: ()=>{
       dispatch(showContentDialog());
     },
-    changeContent: (html, template)=>{
-        dispatch(changeTemplateHtml(html, template));
+    changeContent: (html, languages)=>{
+        dispatch(changeTemplateHtml(html, languages));
     },
     saveContent: (templateApiInfo)=>{
         dispatch(saveAllContent(templateApiInfo));

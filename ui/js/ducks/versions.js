@@ -24,6 +24,8 @@ const HIDE_CONTENT_DIALOG = 'VERSIONS_HIDE_CONTENT_DIALOG';
 const SHOW_IMPORT_DIALOG = 'VERSIONS_SHOW_IMPORT_DIALOG';
 const HIDE_IMPORT_DIALOG = 'VERSIONS_HIDE_IMPORT_DIALOG';
 
+const CHANGE_CHECKBOX = 'CHANGE_CHECKBOX';
+
 //Action Functions
 export const watch = () => {
 	return dispatch =>
@@ -34,6 +36,7 @@ export const watch = () => {
 			});
 		});
 };
+
 export const changeVersion = (v) => {
 	return dispatch => {
 		dispatch({
@@ -48,6 +51,7 @@ export const changeVersion = (v) => {
 		});
 	};
 };
+
 export const createRelease = (timestamp, name) => {
 	return dispatch => {
 		dispatch({
@@ -69,7 +73,7 @@ export const createRelease = (timestamp, name) => {
 	}
 };
 
-export const initialTemplate = (v, t, market) => {
+export const initialTemplate = (v, t, market, languages) => {
     return dispatch => {
         dispatch({
             type: PICK_TEMPLATE_BEGIN,
@@ -80,12 +84,17 @@ export const initialTemplate = (v, t, market) => {
         	let checkedBox = false;
         	Object.keys(response).map((key) => {
         		if (Object.keys(response[key]).length !== 0) {
-                    checkedBox = true
+        			if (key !== 'anonymous') {
+                        checkedBox = true
+                    }
 				}
 			});
+
             dispatch({
                 type: PICK_TEMPLATE_SUCCESS,
                 data: response,
+                checkboxCheck: checkedBox,
+				languages: languages
             });
         });
     };
@@ -106,12 +115,18 @@ export const changeTemplate = (auth, locale) => {
 	};
 };
 
-export const changeTemplateHtml = (html) => {
+export const changeTemplateHtml = (html, languages) => {
 	return dispatch => {
-		dispatch({
-			type: CHANGE_TEMPLATE_HTML,
-			html: html
-		});
+        dispatch({
+            type: CHANGE_TEMPLATE_HTML,
+            html: '',
+            languages: ''
+        });
+        setTimeout(() => dispatch({
+            type: CHANGE_TEMPLATE_HTML,
+            html: html,
+            languages: languages
+        }), 100);
 	};
 };
 
@@ -120,10 +135,24 @@ export const saveAllContent = (saveObject) => {
 	console.log(saveObject);
     return dispatch => {
         dispatch({
-            type: ''
+            type: '',
+			changed: {}
         });
     };
 };
+
+export const specifyContentCheckBox = (checkboxCheck) => {
+    return dispatch => {
+        dispatch({
+            type: CHANGE_CHECKBOX,
+
+        });
+        setTimeout(() => dispatch({
+            type: CHANGE_CHECKBOX,
+            checkboxCheck: checkboxCheck
+        }), 100);
+    };
+}
 
 export const showDialog = () => {
 	return dispatch => {
@@ -227,12 +256,25 @@ export function reducer(state = {
 		let key = Object.keys(action.data.anonymous)[0];
 		let auth = Object.keys(action.data)[0];
 		let html = action.data.anonymous[key];
+		var valid = true;
+        if (action.checkboxCheck) {
+            Object.keys(action.data).map((key) => {
+                let obj = action.data[key];
+                valid = valid && Object.keys(obj).length === action.languages.length;
+            })
+        } else {
+            valid = valid && Object.keys(action.data['anonymous']).length === action.languages.length;
+        }
 		return Object.assign({}, state, {
 			templateApiInfo: action.data,
 			templateHTML: html,
             locale: key,
-            auth: auth
-		});
+            auth: auth,
+            checkboxCheck: action.checkboxCheck,
+            saveContentButton: valid,
+			languages: action.languages,
+			changed: {}
+        });
 		break;
 	case PICK_TEMPLATE_CHANGED:
 		return Object.assign({}, state, {
@@ -263,10 +305,42 @@ export function reducer(state = {
 		break;
 	case CHANGE_TEMPLATE_HTML:
 		state.templateApiInfo[state.auth][state.locale] = action.html;
+		if (Array.isArray(state.changed[state.auth])) {
+			if (state.changed[state.auth].indexOf(state.locale) === -1) {
+                state.changed[state.auth].push(state.locale)
+            }
+		} else {
+            state.changed[state.auth] = [];
+            state.changed[state.auth].push(state.locale);
+		}
+        var valid = true;
+        if (state.checkboxCheck) {
+            Object.keys(state.templateApiInfo).map((key) => {
+                let obj = state.templateApiInfo[key];
+                valid = valid && Object.keys(obj).length === state.languages.length;
+            })
+        } else {
+            valid = valid && Object.keys(state.templateApiInfo['anonymous']).length === state.languages.length;
+        }
 		return Object.assign({}, state, {
 			templateHTML: action.html,
             templateApiInfo: state.templateApiInfo,
-			saveContentButton: true
+            saveContentButton: valid
+        });
+		break;
+	case CHANGE_CHECKBOX:
+        var valid = true;
+        if (!action.checkboxCheck) {
+            Object.keys(state.templateApiInfo).map((key) => {
+                let obj = state.templateApiInfo[key];
+                valid = valid && Object.keys(obj).length === state.languages.length;
+            })
+        } else {
+            valid = valid && Object.keys(state.templateApiInfo['anonymous']).length === state.languages.length;
+        }
+		return Object.assign({}, state, {
+            checkboxCheck: !action.checkboxCheck,
+            saveContentButton: valid
         });
 		break;
 	default:
