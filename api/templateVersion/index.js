@@ -59,7 +59,6 @@ exports.handler = require("leo-sdk/wrappers/resource")(async function (event, co
 					auth: auth,
 				});
 				let hash = template.map[variation];
-				console.log(template.map, variation, hash);
 
 				if (!(hash in seen) && hash in files) {
 					seen[hash] = 1;
@@ -73,7 +72,6 @@ exports.handler = require("leo-sdk/wrappers/resource")(async function (event, co
 				}
 			});
 		});
-		console.log(variations);
 
 		// console.log(event.pathParameters.id, siteWrapper, event.queryStringParameters.showWrappers == true);
 		// if (event.pathParameters.id !== siteWrapper && event.queryStringParameters.showWrappers == true) {
