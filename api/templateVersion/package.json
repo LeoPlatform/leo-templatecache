@@ -12,7 +12,10 @@
 	"config": {
 		"leo": {
 			"type": "resource",
-			"uri": "GET:/api/templateVersion/{version}/{id+}/",
+			"uri": [
+				"GET:/api/templateVersion/{market}/{version}/{id+}/",
+				"POST:/api/templateVersion/{market}/{version}/{id+}/"
+			],
 			"handler": "handler",
 			"role": null,
 			"memory": 256,

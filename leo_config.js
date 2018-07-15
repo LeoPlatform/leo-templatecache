@@ -15,7 +15,7 @@ module.exports = {
 		resources: {
 			Templates: 'devLeoTemplateCache-Templates-R8ZA5K903VCC',
 			TemplateVersions: 'devLeoTemplateCache-TemplateVersions-3D01R5P9LF3H',
-			Versions: 'devLeoTemplateCache-Versions-DUX73NQY4LWP'
+			Versions: 'devLeoTemplateCache-Versions-25ZT5GQDPU1I'
 		},
 		"leosdk": {
 			"Region": "us-west-2",

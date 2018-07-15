@@ -79,7 +79,7 @@ class FormDialog extends React.Component {
             </Button>
             <Button onClick={()=>{
             	console.log(this.state);
-            	this.props.createRelease(this.state.date, this.state.name)
+            	this.props.createRelease(this.state.date, this.state.name, this.props.market)
             }} color="primary">
               Create Release
             </Button>
@@ -91,12 +91,13 @@ class FormDialog extends React.Component {
 
 export default connect(state => ({
   showCreateVersionDialog: state.version.showDialog,
+  market: state.market.id
 }), (dispatch, props) => ({
 	hideDialog: () => {
         dispatch(hideDialog());
 	},
-	createRelease: (timestamp, name) =>{
-		dispatch(createRelease(moment(timestamp).valueOf(), name));
+	createRelease: (timestamp, name,market) =>{
+		dispatch(createRelease(moment(timestamp).valueOf(), name,market));
 	}
 }))(FormDialog);
 

@@ -13,9 +13,9 @@
 		"leo": {
 			"type": "resource",
 			"uri": [
-				"GET:/api/version",
-				"GET:/api/version/{version}",
-				"POST:/api/version"
+				"GET:/api/version/{market}",
+				"GET:/api/version/{market}/{version}/",
+				"POST:/api/version/{market}"
 			],
 			"handler": "handler",
 			"role": null,

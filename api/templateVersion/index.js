@@ -1,10 +1,12 @@
 "use strict";
-require("leo-config").bootstrap(require("../../leo_config.js"));
+const config = require("leo-config");
 
 const request = require("leo-auth");
 const templateLib = require("../../lib/template.js");
 const zlib = require("zlib");
 const querystring = require('querystring');
+const crypto = require("crypto");
+let leoaws = require("leo-aws");
 
 const siteWrapper = "templates/site_wrapper";
 
@@ -25,9 +27,7 @@ let locales = {
 };
 
 const sampleData = {
-	anonymous: {
-
-	},
+	anonymous: {},
 	customer: {
 		__USER_ID__: 'steve'
 	},
@@ -37,63 +37,93 @@ const sampleData = {
 };
 
 exports.handler = require("leo-sdk/wrappers/resource")(async function (event, context, callback) {
+	let dynamodb = leoaws.dynamodb;
 	let settings = Object.assign({}, event);
 
-	let template = await templateLib.getTemplateVersion(event.pathParameters.id, event.pathParameters.version);
-
-	let files = JSON.parse(zlib.gunzipSync(new Buffer(template.files, 'base64')));
-
 	//let's send back all variations for this market and language
-	let market = (event.queryStringParameters.market || 'US').toLowerCase();
+	let market = (event.pathParameters.market || 'US').toLowerCase();
 
-	let variations = {
-		anonymous: {},
-		customer: {},
-		presenter: {}
-	};
-
-	let seen = {};
-
-	locales[market].map(locale => {
-		["anonymous", "customer", "presenter"].forEach(auth => {
-			let variation = templateLib.createOptionString({
-				locale: locale,
-				auth: auth,
-			});
-			let hash = template.map[variation];
-			if (!(hash in seen) && hash in files) {
-				seen[hash] = 1;
-
-				let t = new Buffer(files[hash]).toString("utf-8");
-				let lookup = sampleData[auth];
-				t = t.replace(/(__[^\s]+__)/g, (match) => {
-					return lookup[match];
+	if (event.httpMethod == "GET") {
+		let template = await templateLib.getTemplateVersion(event.pathParameters.id, event.pathParameters.version + "_" + market);
+		let files = template.files;
+		let variations = {
+			anonymous: {},
+			customer: {},
+			presenter: {}
+		};
+		let seen = {};
+		locales[market].map(locale => {
+			["anonymous", "customer", "presenter"].forEach(auth => {
+				let variation = templateLib.createOptionString({
+					locale: locale,
+					auth: auth,
 				});
-				variations[auth][locale] = t;
-			}
+				let hash = template.map[variation];
+				console.log(template.map, variation, hash);
+
+				if (!(hash in seen) && hash in files) {
+					seen[hash] = 1;
+
+					let t = new Buffer(files[hash]).toString("utf-8");
+					let lookup = sampleData[auth];
+					t = t.replace(/(__[^\s]+__)/g, (match) => {
+						return lookup[match];
+					});
+					variations[auth][locale] = t;
+				}
+			});
 		});
-	});
+		console.log(variations);
 
-	// console.log(event.pathParameters.id, siteWrapper, event.queryStringParameters.showWrappers == true);
-	// if (event.pathParameters.id !== siteWrapper && event.queryStringParameters.showWrappers == true) {
-	// 	let wrapper = await templateLib.getTemplateVersion(siteWrapper, event.pathParameters.version);
-	// 	let wrapperFiles = JSON.parse(zlib.gunzipSync(new Buffer(wrapper.files, 'base64')));
+		// console.log(event.pathParameters.id, siteWrapper, event.queryStringParameters.showWrappers == true);
+		// if (event.pathParameters.id !== siteWrapper && event.queryStringParameters.showWrappers == true) {
+		// 	let wrapper = await templateLib.getTemplateVersion(siteWrapper, event.pathParameters.version);
+		// 	let wrapperFiles = JSON.parse(zlib.gunzipSync(new Buffer(wrapper.files, 'base64')));
 
-	// 	let hash = wrapper.map[variation];
-	// 	let w = new Buffer(wrapperFiles[hash]).toString("utf-8");
-	// 	t = w.replace("__CONTENT__", t);
-	// }
+		// 	let hash = wrapper.map[variation];
+		// 	let w = new Buffer(wrapperFiles[hash]).toString("utf-8");
+		// 	t = w.replace("__CONTENT__", t);
+		// }
 
-	zlib.gzip(JSON.stringify(variations), (err, gzip) => {
-		callback(null, {
-			statusCode: 200,
-			headers: {
-				'Content-Type': 'application/json',
-				'Content-Encoding': 'gzip'
-			},
-			body: gzip.toString("base64"),
-			isBase64Encoded: true
+		zlib.gzip(JSON.stringify(variations), (err, gzip) => {
+			callback(null, {
+				statusCode: 200,
+				headers: {
+					'Content-Type': 'application/json',
+					'Content-Encoding': 'gzip'
+				},
+				body: gzip.toString("base64"),
+				isBase64Encoded: true
+			});
 		});
-	});
+	} else if (event.httpMethod == "POST") {
+		let compiled = {};
+
+		let fileContents = {};
+		let fileMap = {};
+		Object.keys(event.body).map(auth => {
+			Object.keys(event.body[auth]).map(locale => {
+				let id = templateLib.createOptionString({
+					auth,
+					locale
+				});
+				let hash = crypto.createHash('md5').update(id).digest('hex');
+				fileMap[id] = hash;
+				fileContents[hash] = event.body[auth][locale];
+			});
+		});
+
+		let gzip = zlib.createGzip();
+		zlib.gzip(JSON.stringify(fileContents), async (err, buf) => {
+			await dynamodb.update(config.resources.TemplateVersions, {
+				id: event.pathParameters.id,
+				v: event.pathParameters.version + "_" + market
+			}, {
+				files: buf.toString("base64"),
+				map: fileMap
+			});
+			return callback();
+		});
+	}
 
 });

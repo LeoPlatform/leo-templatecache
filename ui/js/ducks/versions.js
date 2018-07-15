@@ -15,6 +15,8 @@ const CHANGE_TEMPLATE_HTML = 'CHANGE_TEMPLATE_HTML';
 
 const ADD_RELEASE = 'VERSIONS_ADD_RELEASE';
 
+const CLEAR = 'VERSIONS_CLEAR';
+
 const SHOW_DIALOG = 'VERSIONS_SHOW_DIALOG';
 const HIDE_DIALOG = 'VERSIONS_HIDE_DIALOG';
 
@@ -26,24 +28,31 @@ const HIDE_IMPORT_DIALOG = 'VERSIONS_HIDE_IMPORT_DIALOG';
 
 const CHANGE_CHECKBOX = 'CHANGE_CHECKBOX';
 
+const SAVE_CONTENT_BEGIN = 'VERSIONS_SAVE_CONTENT_BEGIN';
+const SAVE_CONTENT_SUCCESS = 'VERSIONS_SAVE_CONTENT';
+
 //Action Functions
-export const watch = () => {
-	return dispatch =>
-		$.get(`api/version`, response => {
+export const watch = (market) => {
+	return dispatch => {
+		dispatch({
+			type: CLEAR
+		});
+		$.get(`api/version/${market}`, response => {
 			dispatch({
 				type: FETCH_SUCCESS,
 				data: response
 			});
 		});
+	};
 };
 
-export const changeVersion = (v) => {
+export const changeVersion = (v, market) => {
 	return dispatch => {
 		dispatch({
 			type: PICK_VERSION_BEGIN,
 			version: v
 		});
-		$.get(`api/version/${v.id}`, response => {
+		$.get(`api/version/${market}/${v.id}`, response => {
 			dispatch({
 				type: PICK_VERSION_SUCCESS,
 				data: response
@@ -52,16 +61,17 @@ export const changeVersion = (v) => {
 	};
 };
 
-export const createRelease = (timestamp, name) => {
+export const createRelease = (timestamp, name, market) => {
 	return dispatch => {
 		dispatch({
 			type: ADD_RELEASE,
 			data: {
-				id: name,
-				ts: timestamp
+				id: timestamp,
+				name: name,
+				markets: [market]
 			}
 		});
-		$.post(`api/version`, {
+		$.post(`api/version/${market}`, {
 			name,
 			timestamp
 		}, response => {
@@ -74,39 +84,39 @@ export const createRelease = (timestamp, name) => {
 };
 
 export const initialTemplate = (v, t, market, languages) => {
-    return dispatch => {
-        dispatch({
-            type: PICK_TEMPLATE_BEGIN,
-            template: t
-        });
-        $.get(`api/templateVersion/${v.id}/${t.id}?market=${market}`, response => {
-        	// Change checkbox to have this state
-        	let checkedBox = false;
-        	Object.keys(response).map((key) => {
-        		if (Object.keys(response[key]).length !== 0) {
-        			if (key !== 'anonymous') {
-                        checkedBox = true
-                    }
+	return dispatch => {
+		dispatch({
+			type: PICK_TEMPLATE_BEGIN,
+			template: t
+		});
+		$.get(`api/templateVersion/${market}/${v.id}/${t.id}`, response => {
+			// Change checkbox to have this state
+			let checkedBox = false;
+			Object.keys(response).map((key) => {
+				if (Object.keys(response[key]).length !== 0) {
+					if (key !== 'anonymous') {
+						checkedBox = true
+					}
 				}
 			});
 
-            dispatch({
-                type: PICK_TEMPLATE_SUCCESS,
-                data: response,
-                checkboxCheck: checkedBox,
+			dispatch({
+				type: PICK_TEMPLATE_SUCCESS,
+				data: response,
+				checkboxCheck: checkedBox,
 				languages: languages
-            });
-        });
-    };
+			});
+		});
+	};
 };
 
 export const changeTemplate = (auth, locale) => {
 	return dispatch => {
-        dispatch({
-            type: PICK_TEMPLATE_CHANGED,
-            auth: '',
-            locale: ''
-        });
+		dispatch({
+			type: PICK_TEMPLATE_CHANGED,
+			auth: '',
+			locale: ''
+		});
 		setTimeout(() => dispatch({
 			type: PICK_TEMPLATE_CHANGED,
 			auth: auth,
@@ -117,41 +127,45 @@ export const changeTemplate = (auth, locale) => {
 
 export const changeTemplateHtml = (html, languages) => {
 	return dispatch => {
-        dispatch({
-            type: CHANGE_TEMPLATE_HTML,
-            html: '',
-            languages: ''
-        });
-        setTimeout(() => dispatch({
-            type: CHANGE_TEMPLATE_HTML,
-            html: html,
-            languages: languages
-        }), 100);
+		dispatch({
+			type: CHANGE_TEMPLATE_HTML,
+			html: '',
+			languages: ''
+		});
+		setTimeout(() => dispatch({
+			type: CHANGE_TEMPLATE_HTML,
+			html: html,
+			languages: languages
+		}), 100);
 	};
 };
 
-export const saveAllContent = (saveObject) => {
-	// TO DO SAVE STUFF WOHOO
-	console.log(saveObject);
-    return dispatch => {
-        dispatch({
-            type: '',
-			changed: {}
-        });
-    };
+export const saveAllContent = (market, version, template, saveObject) => {
+	return dispatch => {
+		console.log(saveObject);
+		dispatch({
+			type: SAVE_CONTENT_BEGIN
+		});
+		$.post(`api/templateVersion/${market}/${version}/${template}`, JSON.stringify(saveObject), response => {
+			dispatch({
+				type: SAVE_CONTENT_SUCCESS,
+				data: response
+			});
+		});
+	};
 };
 
 export const specifyContentCheckBox = (checkboxCheck) => {
-    return dispatch => {
-        dispatch({
-            type: CHANGE_CHECKBOX,
+	return dispatch => {
+		dispatch({
+			type: CHANGE_CHECKBOX,
 
-        });
-        setTimeout(() => dispatch({
-            type: CHANGE_CHECKBOX,
-            checkboxCheck: checkboxCheck
-        }), 100);
-    };
+		});
+		setTimeout(() => dispatch({
+			type: CHANGE_CHECKBOX,
+			checkboxCheck: checkboxCheck
+		}), 100);
+	};
 }
 
 export const showDialog = () => {
@@ -226,11 +240,23 @@ export function reducer(state = {
 		return Object.assign({}, state, {
 			list: action.data,
 		});
+	case FETCH_SUCCESS:
+		return Object.assign({}, state, {
+			list: action.data,
+		});
 	case PICK_VERSION_BEGIN:
 		return Object.assign({}, state, {
 			version: action.version,
 			templates: [],
 			openContent: false
+		});
+		break;
+	case CLEAR:
+		return Object.assign({}, state, {
+			list: [],
+			templates: [],
+			templateApiInfo: [],
+			openContent: false,
 		});
 		break;
 	case ADD_RELEASE:
@@ -249,36 +275,36 @@ export function reducer(state = {
 			templateOptions: action.options,
 			templateHTML: 'Please wait...Loading',
 			openContent: true,
-            saveContentButton: false
-        });
+			saveContentButton: false
+		});
 		break;
 	case PICK_TEMPLATE_SUCCESS:
 		let key = Object.keys(action.data.anonymous)[0];
 		let auth = Object.keys(action.data)[0];
 		let html = action.data.anonymous[key];
 		var valid = true;
-        if (action.checkboxCheck) {
-            Object.keys(action.data).map((key) => {
-                let obj = action.data[key];
-                valid = valid && Object.keys(obj).length === action.languages.length;
-            })
-        } else {
-            valid = valid && Object.keys(action.data['anonymous']).length === action.languages.length;
-        }
+		if (action.checkboxCheck) {
+			Object.keys(action.data).map((key) => {
+				let obj = action.data[key];
+				valid = valid && Object.keys(obj).length === action.languages.length;
+			})
+		} else {
+			valid = valid && Object.keys(action.data['anonymous']).length === action.languages.length;
+		}
 		return Object.assign({}, state, {
 			templateApiInfo: action.data,
 			templateHTML: html,
-            locale: key,
-            auth: auth,
-            checkboxCheck: action.checkboxCheck,
-            saveContentButton: valid,
+			locale: key,
+			auth: auth,
+			checkboxCheck: action.checkboxCheck,
+			saveContentButton: valid,
 			languages: action.languages,
 			changed: {}
-        });
+		});
 		break;
 	case PICK_TEMPLATE_CHANGED:
 		return Object.assign({}, state, {
-            templateHTML: state.templateApiInfo && state.templateApiInfo[action.auth] && state.templateApiInfo[action.auth][action.locale] || 'No content',
+			templateHTML: state.templateApiInfo && state.templateApiInfo[action.auth] && state.templateApiInfo[action.auth][action.locale] || 'No content',
 			locale: action.locale,
 			auth: action.auth
 		});
@@ -307,45 +333,43 @@ export function reducer(state = {
 		state.templateApiInfo[state.auth][state.locale] = action.html;
 		if (Array.isArray(state.changed[state.auth])) {
 			if (state.changed[state.auth].indexOf(state.locale) === -1) {
-                state.changed[state.auth].push(state.locale)
-            }
+				state.changed[state.auth].push(state.locale)
+			}
 		} else {
-            state.changed[state.auth] = [];
-            state.changed[state.auth].push(state.locale);
+			state.changed[state.auth] = [];
+			state.changed[state.auth].push(state.locale);
 		}
-        var valid = true;
-        if (state.checkboxCheck) {
-            Object.keys(state.templateApiInfo).map((key) => {
-                let obj = state.templateApiInfo[key];
-                valid = valid && Object.keys(obj).length === state.languages.length;
-            })
-        } else {
-            valid = valid && Object.keys(state.templateApiInfo['anonymous']).length === state.languages.length;
-        }
+		var valid = true;
+		if (state.checkboxCheck) {
+			Object.keys(state.templateApiInfo).map((key) => {
+				let obj = state.templateApiInfo[key];
+				valid = valid && Object.keys(obj).length === state.languages.length;
+			})
+		} else {
+			valid = valid && Object.keys(state.templateApiInfo['anonymous']).length === state.languages.length;
+		}
 		return Object.assign({}, state, {
 			templateHTML: action.html,
-            templateApiInfo: state.templateApiInfo,
-            saveContentButton: valid
-        });
+			templateApiInfo: state.templateApiInfo,
+			saveContentButton: valid
+		});
 		break;
 	case CHANGE_CHECKBOX:
-        var valid = true;
-        if (!action.checkboxCheck) {
-            Object.keys(state.templateApiInfo).map((key) => {
-                let obj = state.templateApiInfo[key];
-                valid = valid && Object.keys(obj).length === state.languages.length;
-            })
-        } else {
-            valid = valid && Object.keys(state.templateApiInfo['anonymous']).length === state.languages.length;
-        }
+		var valid = true;
+		if (!action.checkboxCheck) {
+			Object.keys(state.templateApiInfo).map((key) => {
+				let obj = state.templateApiInfo[key];
+				valid = valid && Object.keys(obj).length === state.languages.length;
+			})
+		} else {
+			valid = valid && Object.keys(state.templateApiInfo['anonymous']).length === state.languages.length;
+		}
 		return Object.assign({}, state, {
-            checkboxCheck: !action.checkboxCheck,
-            saveContentButton: valid
-        });
+			checkboxCheck: !action.checkboxCheck,
+			saveContentButton: valid
+		});
 		break;
 	default:
 		return state;
 	}
 }
-
-

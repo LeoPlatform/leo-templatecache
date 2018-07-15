@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 
-import {watch} from '../ducks/versions.js';
 import {changeMarket} from '../ducks/market.js';
 
 
@@ -15,7 +14,7 @@ import Versions from './tables/versions.jsx';
 
 class ProductList extends React.Component {
   componentDidMount() {
-    this.props.watch();
+    this.props.init();
   }
 
   render() {
@@ -44,7 +43,7 @@ export default connect(state=>({
 	versions: state.version.list,
 	market: state.market.id
 }), dispatch=>({
-	watch: () =>dispatch(watch()),
+	init: () =>dispatch(changeMarket("US")),
 	changeTab: (e,market) =>{
 		dispatch(changeMarket(market));
 		return false;

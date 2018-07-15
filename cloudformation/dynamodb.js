@@ -38,7 +38,7 @@ module.exports = cf.add(cf.dynamodb.table("Templates", {
 			}
 		}
 	})).add(cf.dynamodb.table("Versions", {
-		id: 'S',
+		id: 'N',
 		throughput: {
 			read: 1,
 			write: 1

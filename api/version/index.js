@@ -16,8 +16,9 @@ exports.handler = require("leo-sdk/wrappers/resource")(async function (event, co
 			// action: "create"
 			action: "view"
 		}).then(async user => {
-			let something = await dynamodb.put(config.resources.Versions, event.body.name, {
-				ts: parseInt(event.body.timestamp)
+			let something = await dynamodb.put(config.resources.Versions, parseInt(event.body.timestamp), {
+				name: event.body.name,
+				markets: [event.pathParameters.market.toLowerCase()]
 			});
 			console.log(something);
 		});
@@ -29,10 +30,10 @@ exports.handler = require("leo-sdk/wrappers/resource")(async function (event, co
 			if (event.pathParameters.version) {
 				let templates = await dynamodb.query({
 					TableName: config.resources.TemplateVersions,
-					IndexName: "v-id-index",
+					IndexName: "versions",
 					KeyConditionExpression: "v = :v",
 					ExpressionAttributeValues: {
-						":v": event.pathParameters.version
+						":v": event.pathParameters.version + "_" + event.pathParameters.market.toLowerCase()
 					},
 					"ReturnConsumedCapacity": 'TOTAL'
 				});
@@ -46,7 +47,13 @@ exports.handler = require("leo-sdk/wrappers/resource")(async function (event, co
 				});
 				callback(null, templates);
 			} else {
-				let versions = await dynamodb.scan(config.resources.Versions);
+				let versions = await dynamodb.scan({
+					TableName: config.resources.Versions,
+					FilterExpression: "contains(markets, :market)",
+					ExpressionAttributeValues: {
+						':market': event.pathParameters.market.toLowerCase(),
+					}
+				});
 				callback(null, versions);
 			}
 		});

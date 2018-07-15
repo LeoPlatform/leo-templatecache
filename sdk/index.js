@@ -16,6 +16,7 @@ const optionsOrder = ['locale', 'auth'];
 const options = {
 	locale: [
 		'en_US',
+		'es_US',
 		'it_US',
 		'es_ES',
 		'es_MX',

@@ -3,18 +3,19 @@
 let config = require("leo-config");
 
 let leoaws = require("leo-aws");
-const cache = require("leo-aws/utils/cache.js");
+const cache = require("leo-cache");
 
 const union = require("lodash.union");
-var querystring = require("querystring");
 const crypto = require("crypto");
+
+var querystring = require("querystring");
 const zlib = require("zlib");
+const moment = require("moment");
 
 const templateLib = require("../../lib/template.js");
 
 exports.handler = require("leo-sdk/wrappers/resource")(async (event, context, callback) => {
 	let dynamodb = leoaws.dynamodb;
-
 	// let user = await request.getUser(event);
 	//Categorize what they are trying to do.
 
@@ -23,83 +24,46 @@ exports.handler = require("leo-sdk/wrappers/resource")(async (event, context, ca
 	// 	lrn: 'lrn:leo:botmon:::cron',
 	// 	action: event.httpMethod == "POST" ? "PUTVersion" : "GetVersion"
 	// });
-
 	console.time("done");
-	if (event.httpMethod == "GET") {
-		let pageId = event.pathParameters.id;
+	let pageId = event.pathParameters.id;
+	let asOf = event.queryStringParameters.asOf ? moment(event.queryStringParameters.asOf).valueOf() : moment.now();
 
-		let versions = await cache.get("VERSIONS", () => dynamodb.scan(config.resources.Versions));
-		let templateVersions = await cache.get("TEMPLATE_VERSIONS", () => dynamodb.query({
-			TableName: config.resources.TemplateVersions,
-			IndexName: "list",
-			KeyConditionExpression: "id = :id",
-			ExpressionAttributeValues: {
-				":id": pageId
-			},
-			"ReturnConsumedCapacity": 'TOTAL'
-		}));
-		console.log(pageId, versions, templateVersions);
-
-		let availableVersions = templateVersions.reduce((a, e) => {
-			a[e.v] = true;
-			return a;
-		}, {});
-
-		//Only ones that are schedule for release
-		versions = versions.filter(v => v.ts).sort((a, b) => {
-			return b.ts - a.ts;
-		});
-		let latestVersion = null;
-		for (let i = 0; i < versions.length; i++) {
-			if (availableVersions[versions[i].id]) {
-				latestVersion = versions[i];
-				break;
-			}
+	//Add one millisecond so that we get all markets schedule to go at this timestamp
+	asOf += 1;
+	let templateVersions = await cache.get(`TEMPLATE_VERSIONS_${pageId}`, () => dynamodb.query({
+		TableName: config.resources.TemplateVersions,
+		IndexName: "list",
+		KeyConditionExpression: "id = :id",
+		ExpressionAttributeValues: {
+			":id": pageId
+		},
+		ScanIndexForward: false,
+		"ReturnConsumedCapacity": 'TOTAL'
+	}));
+	console.log("versions", templateVersions);
+	//lets figure out which versions should go out, one per each market
+	let versions = {};
+	templateVersions.forEach(e => {
+		let market = e.v.split(/_/, 2).slice(1).join("_");
+		if (!(market in versions)) {
+			versions[market] = e.v;
 		}
-
-		if (!latestVersion) {
-			callback(null, {
-				statusCode: 404,
-				headers: {
-					'Content-Type': 'text/html'
-				},
-				body: "Template Not Found"
-			});
-		}
-
-		let template = await cache.get(`TEMPLATE_${pageId}_${latestVersion.id}`, () => templateLib.getTemplateVersion(pageId, latestVersion.id), 1 * 24 * 60 * 60 * 1000);
+	});
+	let templates = await Promise.all(Object.values(versions).map(version => {
+		return cache.get(`TEMPLATE_${pageId}_${version}`, () => templateLib.getTemplateVersion(pageId, version), 1 * 24 * 60 * 60 * 1000)
+	}));
+	let template = templates.reduce((a, d) => {
+		Object.assign(a.map, d.map);
+		Object.assign(a.files, d.files);
+		return a;
+	}, {
+		map: {},
+		files: {}
+	});
+	let gzip = zlib.createGzip();
+	zlib.gzip(JSON.stringify(template.files), async (err, buf) => {
+		template.files = buf.toString("base64");
 		console.timeEnd("done");
 		callback(null, template);
-	} else if (event.httpMethod == "POST") {
-		let compiled = {};
-
-		await dynamodb.update(config.resources.Templates, event.pathParameters.id, {});
-		await dynamodb.update(config.resources.Versions, event.pathParameters.version, {});
-
-		let fileContents = {};
-		let fileMap = {};
-
-		if (Buffer.isBuffer(event.body)) {
-			event.body = JSON.parse(zlib.gunzipSync(event.body));
-		}
-
-		Object.keys(event.body).map(e => {
-			let id = templateLib.createOptionString(querystring.parse(e));
-			let hash = crypto.createHash('md5').update(id).digest('hex');
-			fileMap[id] = hash;
-			fileContents[hash] = event.body[e];
-		});
-
-		let gzip = zlib.createGzip();
-		zlib.gzip(JSON.stringify(fileContents), async (err, buf) => {
-			await dynamodb.update(config.resources.TemplateVersions, {
-				id: event.pathParameters.id,
-				v: event.pathParameters.version
-			}, {
-				files: buf.toString("base64"),
-				map: fileMap
-			});
-			return callback();
-		});
-	}
+	});
 });

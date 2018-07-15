@@ -1,11 +1,19 @@
 //Actions
 const CHANGE_MARKET = 'NAVIGATION_CHANGE_MARKET';
+import {
+	watch
+} from '../ducks/versions.js';
 
 //Action Functions
-export const changeMarket = (market) => ({
-	type: CHANGE_MARKET,
-	market: market
-});
+export const changeMarket = (market) => {
+	return dispatch => {
+		dispatch(watch(market));
+		dispatch({
+			type: CHANGE_MARKET,
+			market: market
+		});
+	};
+};
 
 //Known locales
 let locales = {

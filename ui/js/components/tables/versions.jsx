@@ -102,8 +102,8 @@ class VersionTable extends React.Component {
                      {this.props.versions.map((v,i)=>{
                       let isSelected = v.id === this.props.version.id;
                          return [i==0?null:<Divider />, 
-                         <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.versionSelect(v)}>
-                            <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={moment(v.ts).format('LLLL')} secondary={v.id}/>
+                         <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.versionSelect(v, this.props.market)}>
+                            <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={moment(v.id).format('LLLL')} secondary={v.name}/>
                          </MenuItem>]
                     })}
                     </MenuList>
@@ -181,7 +181,7 @@ class VersionTable extends React.Component {
                                         : false
 
                                 }
-                                <Button variant="contained" color="primary" disabled={!this.props.saveContentButton} className={classes.button} onClick={()=>this.props.saveContent(this.props.templateApiInfo)}>
+                                <Button variant="contained" color="primary" disabled={!this.props.saveContentButton} className={classes.button} onClick={()=>this.props.saveContent(this.props.market, this.props.version.id, this.props.template.id, this.props.templateApiInfo)}>
                                     Save Content
                                 </Button>
                             </div>
@@ -210,8 +210,8 @@ export default connect(state => ({
     languages: state.market.languages,
     saveContentButton: state.version.saveContentButton || false
 }), (dispatch, props) => ({
-	versionSelect: (version) => {
-        dispatch(changeVersion(version));
+	versionSelect: (version, market) => {
+        dispatch(changeVersion(version, market));
 	},
     initialTemplate: (template,version, options, languages) => {
         dispatch(initialTemplate(version, template, options, languages));
@@ -234,7 +234,8 @@ export default connect(state => ({
     changeContent: (html, languages)=>{
         dispatch(changeTemplateHtml(html, languages));
     },
-    saveContent: (templateApiInfo)=>{
-        dispatch(saveAllContent(templateApiInfo));
+    saveContent: (market, version, template,  templateApiInfo)=>{
+        console.log(market, version, template, templateApiInfo);
+        dispatch(saveAllContent(market, version, template, templateApiInfo));
     }
 }))(withStyles(styles)(VersionTable));
