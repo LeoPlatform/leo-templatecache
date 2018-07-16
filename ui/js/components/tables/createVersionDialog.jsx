@@ -41,6 +41,11 @@ class FormDialog extends React.Component {
 	};
   }
 
+  createRelease() {
+      this.props.hideDialog();
+      this.props.createRelease(this.state.date, this.state.name, this.props.market)
+  }
+
   render() {
     return (<Dialog
           open={this.props.showCreateVersionDialog}
@@ -78,8 +83,7 @@ class FormDialog extends React.Component {
               Cancel
             </Button>
             <Button onClick={()=>{
-            	console.log(this.state);
-            	this.props.createRelease(this.state.date, this.state.name, this.props.market)
+            	this.createRelease()
             }} color="primary">
               Create Release
             </Button>
