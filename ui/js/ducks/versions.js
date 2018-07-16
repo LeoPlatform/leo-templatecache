@@ -88,10 +88,7 @@ export const createRelease = (timestamp, name, market) => {
 				markets: [market]
 			}
 		});
-		$.post(`api/version/${market}`, {
-			name,
-			timestamp
-		}, response => {
+		$.post(`api/version/${market}`, JSON.stringify({name, timestamp}), response => {
 			dispatch({
 				type: ADD_RELEASE,
 				data: response
@@ -273,12 +270,9 @@ export function reducer(state = {
 	switch (action.type) {
 	case FETCH_SUCCESS:
 		return Object.assign({}, state, {
-			list: action.data,
+			list: action.data.sort((a,b) => a.id-b.id),
 		});
-	case FETCH_SUCCESS:
-		return Object.assign({}, state, {
-			list: action.data,
-		});
+	break
 	case PICK_VERSION_BEGIN:
 		return Object.assign({}, state, {
 			version: action.version,
@@ -299,7 +293,7 @@ export function reducer(state = {
 		break;
 	case ADD_RELEASE:
 		return Object.assign({}, state, {
-			list: state.list.concat(action.data)
+			list: state.list.concat(action.data).sort((a,b) => a.id-b.id)
 		});
 		break;
 	case PICK_VERSION_SUCCESS:
