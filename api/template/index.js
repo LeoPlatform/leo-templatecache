@@ -65,10 +65,28 @@ exports.handler = require("leo-sdk/wrappers/resource")(async (event, context, ca
 	// console.log(template.map);
 	// console.log(template.files);
 
-	let gzip = zlib.createGzip();
-	zlib.gzip(JSON.stringify(template.files), async (err, buf) => {
-		template.files = buf.toString("base64");
-		console.timeEnd("done");
-		callback(null, template);
-	});
+	if (event.queryStringParameters.browser) {
+		let gzip = zlib.createGzip();
+		Object.keys(template.files).forEach(k => {
+			template.files[k] = new Buffer(template.files[k]).toString("utf8");
+		});
+		zlib.gzip(JSON.stringify(template), async (err, gzip) => {
+			callback(null, {
+				statusCode: 200,
+				headers: {
+					'Content-Type': 'application/json',
+					'Content-Encoding': 'gzip'
+				},
+				body: gzip.toString("base64"),
+				isBase64Encoded: true
+			});
+		});
+	} else {
+		let gzip = zlib.createGzip();
+		zlib.gzip(JSON.stringify(template.files), async (err, buf) => {
+			template.files = buf.toString("base64");
+			console.timeEnd("done");
+			callback(null, template);
+		});
+	}
 });
