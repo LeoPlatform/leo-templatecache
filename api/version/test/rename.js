@@ -5,11 +5,10 @@ module.exports = {
 	httpMethod: "POST",
 	headers: {},
 	pathParameters: {
-		version: "1532225460002"
+		version: "1532225460003"
 	},
 	body: {
-		id: "1532225460003",
-		name: "test change"
+		name: "I renamed it"
 	},
 	isBase64Encoded: false,
 };
