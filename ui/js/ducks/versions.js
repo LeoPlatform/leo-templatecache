@@ -1,3 +1,5 @@
+import async from "async";
+
 //Actions
 const FETCH_SUCCESS = 'VERSIONS_FETCH_SUCCESS';
 
@@ -14,6 +16,8 @@ const CHANGE_TEMPLATE_OPTIONS = 'VERSIONS_CHANGE_TEMPLATE_OPTIONS';
 const CHANGE_TEMPLATE_HTML = 'CHANGE_TEMPLATE_HTML';
 
 const ADD_RELEASE = 'VERSIONS_ADD_RELEASE';
+
+const WRAPPED_HTML = 'WRAPPED_HTML';
 
 const CLEAR = 'VERSIONS_CLEAR';
 
@@ -47,18 +51,31 @@ export const watch = (market) => {
 };
 
 export const changeVersion = (v, market) => {
-	return dispatch => {
-		dispatch({
-			type: PICK_VERSION_BEGIN,
-			version: v
-		});
-		$.get(`api/version/${market}/${v.id}`, response => {
-			dispatch({
-				type: PICK_VERSION_SUCCESS,
-				data: response
-			});
-		});
-	};
+    return dispatch => {
+        dispatch({
+            type: PICK_VERSION_BEGIN,
+            version: v
+        });
+        async.parallel({
+            one: (done) => {
+                $.get(`api/version/${market}/${v.id}`, response => {
+                    done(null, {data: response});
+                });
+            },
+            two: (done) => {
+				$.get(`api/template/wrapper_site_main?browser=true&asOf=${v.id}`, response => {
+					done(null, {files: response.files, map: response.map});
+				});
+            }
+        }, (err, results) => {
+            dispatch({
+                type: PICK_VERSION_SUCCESS,
+                data: results.one.data,
+				wrapperFiles: results.two.files,
+				wrapperMap: results.two.map
+            });
+        });
+    }
 };
 
 export const createRelease = (timestamp, name, market) => {
@@ -83,13 +100,13 @@ export const createRelease = (timestamp, name, market) => {
 	}
 };
 
-export const initialTemplate = (v, t, market, languages) => {
+export const initialTemplate = (v, t, market, languages, wrapperMap, templateId) => {
 	return dispatch => {
 		dispatch({
 			type: PICK_TEMPLATE_BEGIN,
 			template: t
 		});
-		$.get(`api/templateVersion/${market}/${v.id}/${t.id}`, response => {
+        $.get(`api/templateVersion/${market}/${v.id}/${t.id}`, response => {
 			// Change checkbox to have this state
 			let checkedBox = false;
 			Object.keys(response).map((key) => {
@@ -100,29 +117,47 @@ export const initialTemplate = (v, t, market, languages) => {
 				}
 			});
 
-			dispatch({
-				type: PICK_TEMPLATE_SUCCESS,
-				data: response,
-				checkboxCheck: checkedBox,
-				languages: languages
-			});
+            let wrapCheck =  `locale=${languages[0]}&auth=${Object.keys(response)[0]}`;
+            let wrapperMapValue = wrapperMap && wrapperMap[wrapCheck];
+            dispatch({
+                type: PICK_TEMPLATE_SUCCESS,
+                data: response,
+                wrapperMapValue: '',
+                templateId: '',
+                checkboxCheck: '',
+                languages: ''
+            });
+            setTimeout(() => dispatch({
+                type: PICK_TEMPLATE_SUCCESS,
+                data: response,
+                wrapperMapValue: wrapperMapValue,
+                templateId: templateId,
+                checkboxCheck: checkedBox,
+                languages: languages
+            }), 100);
 		});
 	};
 };
 
-export const changeTemplate = (auth, locale) => {
-	return dispatch => {
-		dispatch({
-			type: PICK_TEMPLATE_CHANGED,
-			auth: '',
-			locale: ''
-		});
-		setTimeout(() => dispatch({
-			type: PICK_TEMPLATE_CHANGED,
-			auth: auth,
-			locale: locale
-		}), 100);
-	};
+export const changeTemplate = (auth, locale, wrapperMap, templateId) => {
+    return dispatch => {
+        let wrapCheck =  `locale=${locale}&auth=${auth}`;
+        let wrapperMapValue = wrapperMap && wrapperMap[wrapCheck];
+        dispatch({
+            type: PICK_TEMPLATE_CHANGED,
+            auth: '',
+            locale: '',
+            wrapperMapValue: '',
+            templateId: ''
+        });
+        setTimeout(() => dispatch({
+            type: PICK_TEMPLATE_CHANGED,
+            auth: auth,
+            locale: locale,
+            wrapperMapValue: wrapperMapValue,
+            templateId: templateId
+        }), 100);
+    };
 };
 
 export const changeTemplateHtml = (html, languages) => {
@@ -248,7 +283,10 @@ export function reducer(state = {
 		return Object.assign({}, state, {
 			version: action.version,
 			templates: [],
-			openContent: false
+			openContent: false,
+            wrapperFiles: '',
+            wrapperMap: '',
+            wrapperMapValue: ''
 		});
 		break;
 	case CLEAR:
@@ -265,9 +303,12 @@ export function reducer(state = {
 		});
 		break;
 	case PICK_VERSION_SUCCESS:
-		return Object.assign({}, state, {
-			templates: action.data
-		});
+        return Object.assign({}, state, {
+			templates: action.data,
+            wrapperFiles: action.wrapperFiles,
+            wrapperMap: action.wrapperMap,
+            wrapperMapValue: action.wrapperMapValue
+        });
 		break;
 	case PICK_TEMPLATE_BEGIN:
 		return Object.assign({}, state, {
@@ -275,7 +316,9 @@ export function reducer(state = {
 			templateOptions: action.options,
 			templateHTML: 'Please wait...Loading',
 			openContent: true,
-			saveContentButton: false
+			saveContentButton: false,
+            wrappedHTML: '',
+			wrapperMapValue: ''
 		});
 		break;
 	case PICK_TEMPLATE_SUCCESS:
@@ -291,6 +334,12 @@ export function reducer(state = {
 		} else {
 			valid = valid && Object.keys(action.data['anonymous']).length === action.languages.length;
 		}
+        let wrapHTML;
+        if (action.templateId !== 'wrapper_site_main' && state.wrapperFiles && state.wrapperFiles[action.wrapperMapValue]) {
+            wrapHTML = state.wrapperFiles[action.wrapperMapValue].replace('__CONTENT__', html);
+        } else {
+        	wrapHTML = html;
+		}
 		return Object.assign({}, state, {
 			templateApiInfo: action.data,
 			templateHTML: html,
@@ -299,15 +348,26 @@ export function reducer(state = {
 			checkboxCheck: action.checkboxCheck,
 			saveContentButton: valid,
 			languages: action.languages,
-			changed: {}
-		});
+			changed: {},
+            wrappedHTML: wrapHTML,
+            wrapperMapValue: action.wrapperMapValue
+        });
 		break;
 	case PICK_TEMPLATE_CHANGED:
+		let templateHTML = state.templateApiInfo && state.templateApiInfo[action.auth] && state.templateApiInfo[action.auth][action.locale] || 'No content';
+        let wrapHTML2;
+        if (action.templateId !== 'wrapper_site_main' && state.wrapperFiles && state.wrapperFiles[action.wrapperMapValue]) {
+            wrapHTML2 = state.wrapperFiles[action.wrapperMapValue].replace('__CONTENT__', templateHTML);
+        } else {
+            wrapHTML2 = templateHTML;
+        }
 		return Object.assign({}, state, {
-			templateHTML: state.templateApiInfo && state.templateApiInfo[action.auth] && state.templateApiInfo[action.auth][action.locale] || 'No content',
-			locale: action.locale,
-			auth: action.auth
-		});
+			templateHTML: templateHTML,
+            locale: action.locale,
+			auth: action.auth,
+            wrappedHTML: wrapHTML2,
+			wrapperMapValue: action.wrapperMapValue
+        });
 		break;
 	case SHOW_DIALOG:
 		return Object.assign({}, state, {
@@ -348,11 +408,18 @@ export function reducer(state = {
 		} else {
 			valid = valid && Object.keys(state.templateApiInfo['anonymous']).length === state.languages.length;
 		}
+		let wrapHTML3;
+        if (state.templateId !== 'wrapper_site_main' && state.wrapperFiles && state.wrapperFiles[state.wrapperMapValue]) {
+            wrapHTML3 = state.wrapperFiles[state.wrapperMapValue].replace('__CONTENT__', action.html);
+        } else {
+            wrapHTML3 = action.html;
+        }
 		return Object.assign({}, state, {
 			templateHTML: action.html,
 			templateApiInfo: state.templateApiInfo,
-			saveContentButton: valid
-		});
+			saveContentButton: valid,
+            wrappedHTML: wrapHTML3
+        });
 		break;
 	case CHANGE_CHECKBOX:
 		var valid = true;

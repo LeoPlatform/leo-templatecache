@@ -51,7 +51,7 @@ exports.handler = require("leo-sdk/wrappers/resource")(async (event, context, ca
 		}
 	});
 	let templates = await Promise.all(Object.values(versions).map(version => {
-		return cache.get(`TEMPLATE_${pageId}_${version}`, () => templateLib.getTemplateVersion(pageId, version), 1 * 24 * 60 * 60 * 1000)
+		return cache.get(`TEMPLATE_${pageId}_${version}`, () => templateLib.getTemplateVersion(pageId, version), 1 * 60 * 1000)
 	}));
 	let template = templates.reduce((a, d) => {
 		Object.assign(a.map, d.map);

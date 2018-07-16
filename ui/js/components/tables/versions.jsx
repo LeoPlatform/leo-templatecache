@@ -69,6 +69,7 @@ class VersionTable extends React.Component {
         let anchorStyle = {textDecoration: 'none'};
         let cloudIconStyle = {top: '5px', left: '1px', position: 'relative'};
         $('#htmlTextArea').val(this.props.templateHTML);
+        let templateId = this.props.template && this.props.template.id;
 
 		return [
             <div className="view" key="view">
@@ -78,7 +79,7 @@ class VersionTable extends React.Component {
                         <Tab label="Code" />
                     </Tabs>
                 </AppBar>
-                {value === 0 && <iframe src={"data:text/html;charset=utf-8,"+encodeURI(this.props.templateHTML)}></iframe>}
+                {value === 0 && <iframe src={"data:text/html;charset=utf-8,"+encodeURI(this.props.wrappedHTML || '')}></iframe>}
                 {
                     value === 1 &&
                     <div style={{width: '100%', height: '100%'}}>
@@ -99,7 +100,7 @@ class VersionTable extends React.Component {
                     </Button>                
                     <CreateVersion></CreateVersion>    
                     <MenuList id="versionlist" component="div" >
-                     {this.props.versions.map((v,i)=>{
+                     {this.props.versions && this.props.versions.map((v,i)=>{
                       let isSelected = v.id === this.props.version.id;
                          return [i==0?null:<Divider />, 
                          <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.versionSelect(v, this.props.market)}>
@@ -111,10 +112,10 @@ class VersionTable extends React.Component {
                 <div>
                     <h3>Choose a Path</h3>
                     <MenuList id="versionlist" component="div" >
-                     {this.props.templates.map((t,i)=>{
+                     {this.props.templates && this.props.templates.map((t,i)=>{
                          let isSelected = t.id === this.props.template.id && this.props.openContent;
                          return [i==0?null:<Divider />,
-                         <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.initialTemplate(t, this.props.version,this.props.market, this.props.languages)}>
+                         <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.initialTemplate(t, this.props.version,this.props.market, this.props.languages, this.props.wrapperMap, templateId)}>
                             <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={t.id} secondary={t.v===null?'Unchanged':''}/>
                          </MenuItem>]
                     })}
@@ -127,7 +128,7 @@ class VersionTable extends React.Component {
                             <div style={specifyContentPadding}>
                                 Import from drupal <CloudUploadIcon style={cloudIconStyle}/>
                                 <ul style={unorderedListStyle}>
-                                    {this.props.languages.map(l =>{
+                                    {this.props.languages && this.props.languages.map(l =>{
                                         let itemContent = this.props.templateApiInfo && this.props.templateApiInfo['anonymous'] && this.props.templateApiInfo['anonymous'][l];
                                         var isChanged = false;
                                         anchorStyle = {textDecoration: 'none'};
@@ -137,7 +138,7 @@ class VersionTable extends React.Component {
                                         if (this.props.changed && this.props.changed['anonymous'] && this.props.changed['anonymous'].indexOf(l) !== -1) {
                                             isChanged = true
                                         }
-                                        return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('anonymous', l)}><a style={anchorStyle} href="javascript:void(0)">{isChanged ? `*${l}`: l}</a></li>
+                                        return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('anonymous', l, this.props.wrapperMap, templateId)}><a style={anchorStyle} href="javascript:void(0)">{isChanged ? `*${l}`: l}</a></li>
                                     })}
                                 </ul>
                                 <FormControlLabel control={<Checkbox checked={this.props.checkboxCheck === true ? true : false} onChange={()=>{this.props.changeCheckbox(this.props.checkboxCheck)}} value="checkedB"/>} label="More Content"/>
@@ -147,7 +148,7 @@ class VersionTable extends React.Component {
                                             <b>Customer Version</b><br />
                                             Import from drupal <CloudUploadIcon style={cloudIconStyle}/>
                                             <ul style={unorderedListStyle}>
-                                                {this.props.languages.map(l=>{
+                                                {this.props.languages && this.props.languages.map(l=>{
                                                     let itemContent = this.props.templateApiInfo && this.props.templateApiInfo['customer'] && this.props.templateApiInfo['customer'][l];
                                                     var isChanged = false;
                                                     anchorStyle = {textDecoration: 'none'};
@@ -157,14 +158,14 @@ class VersionTable extends React.Component {
                                                     if (this.props.changed && this.props.changed['customer'] && this.props.changed['customer'].indexOf(l) !== -1) {
                                                         isChanged = true
                                                     }
-                                                    return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('customer', l)}><a style={anchorStyle} href="javascript:void(0)">{isChanged ? `*${l}`: l}</a></li>
+                                                    return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('customer', l, this.props.wrapperMap, templateId)}><a style={anchorStyle} href="javascript:void(0)">{isChanged ? `*${l}`: l}</a></li>
                                                 })}
                                             </ul>
 
                                             <b>Presenter Version</b><br />
                                             Import from drupal <CloudUploadIcon style={cloudIconStyle}/>
                                             <ul style={unorderedListStyle}>
-                                                {this.props.languages.map(l=>{
+                                                {this.props.languages && this.props.languages.map(l=>{
                                                     let itemContent = this.props.templateApiInfo && this.props.templateApiInfo['presenter'] && this.props.templateApiInfo['presenter'][l];
                                                     var isChanged = false;
                                                     anchorStyle = {textDecoration: 'none'};
@@ -174,7 +175,7 @@ class VersionTable extends React.Component {
                                                     if (this.props.changed && this.props.changed['presenter'] && this.props.changed['presenter'].indexOf(l) !== -1) {
                                                         isChanged = true
                                                     }
-                                                    return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('presenter', l)}><a style={anchorStyle} href="javascript:void(0)">{isChanged ? `*${l}`: l}</a></li>
+                                                    return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('presenter', l, this.props.wrapperMap, templateId)}><a style={anchorStyle} href="javascript:void(0)">{isChanged ? `*${l}`: l}</a></li>
                                                 })}
                                             </ul>
                                         </div>
@@ -208,16 +209,19 @@ export default connect(state => ({
     templateApiInfo: state.version.templateApiInfo,
     templates: state.version.templates,
     languages: state.market.languages,
-    saveContentButton: state.version.saveContentButton || false
+    saveContentButton: state.version.saveContentButton || false,
+    wrapperFiles: state.version.wrapperFiles,
+    wrapperMap: state.version.wrapperMap,
+    wrappedHTML: state.version.wrappedHTML
 }), (dispatch, props) => ({
 	versionSelect: (version, market) => {
         dispatch(changeVersion(version, market));
 	},
-    initialTemplate: (template,version, options, languages) => {
-        dispatch(initialTemplate(version, template, options, languages));
+    initialTemplate: (template,version, options, languages, wrapperMap, templateId) => {
+        dispatch(initialTemplate(version, template, options, languages, wrapperMap, templateId));
     },
-    templateSelect: (auth, locale) => {
-        dispatch(changeTemplate(auth, locale));
+    templateSelect: (auth, locale, wrapperMap, templateId) => {
+        dispatch(changeTemplate(auth, locale, wrapperMap, templateId));
     },
     createRelease: ()=>{
       dispatch(createRelease("Another test", Date.now()));
@@ -235,7 +239,6 @@ export default connect(state => ({
         dispatch(changeTemplateHtml(html, languages));
     },
     saveContent: (market, version, template,  templateApiInfo)=>{
-        console.log(market, version, template, templateApiInfo);
         dispatch(saveAllContent(market, version, template, templateApiInfo));
     }
 }))(withStyles(styles)(VersionTable));
