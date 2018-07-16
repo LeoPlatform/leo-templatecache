@@ -40,7 +40,8 @@ exports.handler = require("leo-sdk/wrappers/resource")(async (event, context, ca
 		ScanIndexForward: false,
 		"ReturnConsumedCapacity": 'TOTAL'
 	}));
-	console.log("versions", templateVersions);
+	// console.log("versions", templateVersions);
+
 	//lets figure out which versions should go out, one per each market
 	let versions = {};
 	templateVersions.forEach(e => {
@@ -60,6 +61,10 @@ exports.handler = require("leo-sdk/wrappers/resource")(async (event, context, ca
 		map: {},
 		files: {}
 	});
+
+	// console.log(template.map);
+	// console.log(template.files);
+
 	let gzip = zlib.createGzip();
 	zlib.gzip(JSON.stringify(template.files), async (err, buf) => {
 		template.files = buf.toString("base64");

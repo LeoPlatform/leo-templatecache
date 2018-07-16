@@ -15,7 +15,8 @@
 			"uri": [
 				"GET:/api/version/{market}",
 				"GET:/api/version/{market}/{version}/",
-				"POST:/api/version/{market}"
+				"POST:/api/version/{market}",
+				"POST:/api/version/{market}/{version}/"
 			],
 			"handler": "handler",
 			"role": null,
