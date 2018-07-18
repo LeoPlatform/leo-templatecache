@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React from 'react';
 import { connect } from 'react-redux';
 
 import {changeMarket} from '../ducks/market.js';
@@ -17,6 +17,13 @@ class ProductList extends React.Component {
     this.props.init();
   }
 
+  versionSelected(label, val) {
+  	if (this.props.version && this.props.version.markets && this.props.version.markets.indexOf(val) !== -1 || (this.props.market.toLowerCase() === val && this.props.version.id !== null)) {
+		return `*${label}`;
+	}
+	return label;
+  }
+
   render() {
 	return [
 		<AppBar position="static">
@@ -24,12 +31,13 @@ class ProductList extends React.Component {
 			 <Toolbar>
               Choose a Market
 				<Tabs value={this.props.market} onChange={this.props.changeTab} color="inherit">
-					<Tab label="US" value="US"/>
-					<Tab label="Australia" value="AU"/>
-					<Tab label="United Kingdoom" value="UK"/>
-					<Tab label="New Zealand" value="NZ"/>
-					<Tab label="Germany" value="DE"/>
-					<Tab label="Spain" value="ES"/>
+					<Tab label={this.versionSelected('Global', 'glbl')} value="GLBL"/>
+					<Tab label={this.versionSelected('US', 'us')} value="US"/>
+					<Tab label={this.versionSelected('Australia', 'au')} value="AU"/>
+					<Tab label={this.versionSelected('United Kingdoom', 'uk')} value="UK"/>
+					<Tab label={this.versionSelected('New Zealand', 'nz')} value="NZ"/>
+					<Tab label={this.versionSelected('Germany', 'de')} value="DE"/>
+					<Tab label={this.versionSelected('Spain', 'es')} value="ES"/>
 				</Tabs>
 		 </Toolbar>
          </Typography>
@@ -41,14 +49,12 @@ class ProductList extends React.Component {
 
 export default connect(state=>({
 	versions: state.version.list,
-	market: state.market.id
+	market: state.market.id,
+	version: state.version.version
 }), dispatch=>({
 	init: () =>dispatch(changeMarket("US")),
 	changeTab: (e,market) =>{
 		dispatch(changeMarket(market));
 		return false;
-	},
-	onSomeClick: (version)=>{
-		console.log("DO SOMETHING", version);
 	}
 }))(ProductList);

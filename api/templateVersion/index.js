@@ -120,7 +120,7 @@ exports.handler = require("leo-sdk/wrappers/resource")(async function (event, co
 				files: buf.toString("base64"),
 				map: fileMap
 			});
-			return callback();
+			return callback(null,1);
 		});
 	}
 

@@ -32,6 +32,10 @@ const HIDE_IMPORT_DIALOG = 'VERSIONS_HIDE_IMPORT_DIALOG';
 
 const CHANGE_CHECKBOX = 'CHANGE_CHECKBOX';
 
+const TEXT_AREA_CHANGED = 'TEXT_AREA_CHANGED';
+
+const IMPORT_DRUPAL = 'IMPORT_DRUPAL';
+
 const SAVE_CONTENT_BEGIN = 'VERSIONS_SAVE_CONTENT_BEGIN';
 const SAVE_CONTENT_SUCCESS = 'VERSIONS_SAVE_CONTENT';
 
@@ -41,12 +45,28 @@ export const watch = (market) => {
 		dispatch({
 			type: CLEAR
 		});
-		$.get(`api/version/${market}`, response => {
-			dispatch({
-				type: FETCH_SUCCESS,
-				data: response
-			});
-		});
+        async.parallel({
+            one: (done) => {
+                $.get(`api/version/${market}`, response => {
+                    done(null, {data: response});
+                });
+            },
+            two: (done) => {
+            	if (market !== 'GLBL') {
+                    $.get(`api/version/GLBL`, response => {
+                        done(null, {data: response});
+                    });
+                } else {
+                    done(null, {data: null});
+				}
+            }
+        }, (err, results) => {
+            dispatch({
+                type: FETCH_SUCCESS,
+                data: results.one.data,
+				glblData: market !== 'GLBL' ? results.two.data : []
+            });
+        });
 	};
 };
 
@@ -95,6 +115,24 @@ export const createRelease = (timestamp, name, market) => {
 			});
 		});
 	}
+};
+
+export const importFromDrupal = (url, customerUrl, presenterUrl, template) => {
+	console.log(url, customerUrl, presenterUrl, template)
+    return dispatch => {
+        dispatch({
+            type: IMPORT_DRUPAL,
+            // data: {
+            //     url: url
+            // }
+        });
+        // $.post(``, JSON.stringify({url}), response => {
+        //     dispatch({
+        //         type: IMPORT_DRUPAL,
+        //         data: response
+        //     });
+        // });
+    }
 };
 
 export const initialTemplate = (v, t, market, languages, wrapperMap, templateId) => {
@@ -174,14 +212,12 @@ export const changeTemplateHtml = (html, languages) => {
 
 export const saveAllContent = (market, version, template, saveObject) => {
 	return dispatch => {
-		console.log(saveObject);
-		dispatch({
+ 		dispatch({
 			type: SAVE_CONTENT_BEGIN
 		});
 		$.post(`api/templateVersion/${market}/${version}/${template}`, JSON.stringify(saveObject), response => {
 			dispatch({
-				type: SAVE_CONTENT_SUCCESS,
-				data: response
+				type: SAVE_CONTENT_SUCCESS
 			});
 		});
 	};
@@ -232,6 +268,14 @@ export const hideContentDialog = () => {
 	};
 };
 
+export const textAreaChanged = () => {
+    return dispatch => {
+        dispatch({
+            type: TEXT_AREA_CHANGED
+        });
+    };
+};
+
 export const showImportDialog = () => {
 	return dispatch => {
 		dispatch({
@@ -265,12 +309,14 @@ export function reducer(state = {
 	},
 	templateHTML: '',
 	showDialog: false,
+    showDrupalDialog: false,
 	showContentDialog: false
 }, action) {
 	switch (action.type) {
-	case FETCH_SUCCESS:
+		case FETCH_SUCCESS:
+		let data = [...action.data, ...action.glblData].sort((a,b) => a.id-b.id);
 		return Object.assign({}, state, {
-			list: action.data.sort((a,b) => a.id-b.id),
+			list: data.sort((a,b) => a.id-b.id),
 		});
 	break
 	case PICK_VERSION_BEGIN:
@@ -289,11 +335,16 @@ export function reducer(state = {
 			templates: [],
 			templateApiInfo: [],
 			openContent: false,
+			version: {id: null}
 		});
 		break;
 	case ADD_RELEASE:
 		return Object.assign({}, state, {
 			list: state.list.concat(action.data).sort((a,b) => a.id-b.id)
+		});
+		break;
+	case IMPORT_DRUPAL:
+		return Object.assign({}, state, {
 		});
 		break;
 	case PICK_VERSION_SUCCESS:
@@ -315,6 +366,11 @@ export function reducer(state = {
 			wrapperMapValue: ''
 		});
 		break;
+	case SAVE_CONTENT_SUCCESS:
+        return Object.assign({}, state, {
+            changed: {}
+        });
+        break;
 	case PICK_TEMPLATE_SUCCESS:
 		let key = Object.keys(action.data.anonymous)[0];
 		let auth = Object.keys(action.data)[0];
@@ -381,6 +437,25 @@ export function reducer(state = {
 	case HIDE_CONTENT_DIALOG:
 		return Object.assign({}, state, {
 			showContentDialog: false
+		});
+		break;
+	case SHOW_IMPORT_DIALOG:
+		return Object.assign({}, state, {
+            showDrupalDialog: true
+		});
+		break;
+	case HIDE_IMPORT_DIALOG:
+		return Object.assign({}, state, {
+            showDrupalDialog: false
+		});
+		break;
+	case TEXT_AREA_CHANGED:
+		let changes = !state.codeChange;
+		if(state.codeChanged) {
+			changes = true;
+		}
+		return Object.assign({}, state, {
+            codeChanged: changes
 		});
 		break;
 	case CHANGE_TEMPLATE_HTML:

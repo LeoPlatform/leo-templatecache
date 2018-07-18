@@ -31,10 +31,11 @@ import Typography from '@material-ui/core/Typography';
 import Toolbar from '@material-ui/core/Toolbar';
 
 import CreateVersion from './createVersionDialog.jsx';
+import ImportDrupal from './importDrupalDialog.jsx';
 
 import moment from 'moment';
 
-import {changeVersion, changeTemplate, createRelease, showDialog, showContentDialog, changeTemplateHtml, initialTemplate, saveAllContent, specifyContentCheckBox} from '../../ducks/versions.js';
+import {changeVersion, changeTemplate, createRelease, showDialog, showContentDialog, changeTemplateHtml, initialTemplate, saveAllContent, specifyContentCheckBox, textAreaChanged, showImportDialog} from '../../ducks/versions.js';
 
 import { withStyles } from '@material-ui/core/styles';
 const styles = theme => ({
@@ -67,10 +68,11 @@ class VersionTable extends React.Component {
         let specifyContentPadding = {paddingLeft: '12px'};
         let unorderedListItemPadding = {paddingBottom: '5px'};
         let anchorStyle = {textDecoration: 'none'};
-        let cloudIconStyle = {top: '5px', left: '1px', position: 'relative'};
+        let cloudIconStyle = {left: '5px', position: 'relative'};
         $('#htmlTextArea').val(this.props.templateHTML);
         let templateId = this.props.template && this.props.template.id;
-
+        let disableSave = (this.props.changed && Object.keys(this.props.changed).length !== 0) && this.props.saveContentButton;
+        
 		return [
             <div className="view" key="view">
                 <AppBar className="appBar" position="static">
@@ -93,16 +95,17 @@ class VersionTable extends React.Component {
                 }
             </div>,
             <div className="select" key="versions">
-                <div>
+                <div style={{overflow:'auto'}}>
                     <h3>Choose a Release</h3>
                     <Button variant="contained" color="primary" className={classes.button} onClick={()=>this.props.showDialog()}>
                       Create a Release
                     </Button>                
-                    <CreateVersion></CreateVersion>    
-                    <MenuList id="versionlist" component="div" >
+                    <CreateVersion></CreateVersion>
+                    <ImportDrupal></ImportDrupal>
+                    <MenuList id="versionlist" component="div">
                      {this.props.versions && this.props.versions.map((v,i)=>{
                       let isSelected = v.id === this.props.version.id;
-                         return [i==0?null:<Divider />, 
+                         return [i==0?null:<Divider />,
                          <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.versionSelect(v, this.props.market)}>
                             <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={moment(v.id).format('LLLL')} secondary={v.name}/>
                          </MenuItem>]
@@ -116,7 +119,8 @@ class VersionTable extends React.Component {
                          let isSelected = t.id === this.props.template.id && this.props.openContent;
                          return [i==0?null:<Divider />,
                          <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.initialTemplate(t, this.props.version,this.props.market, this.props.languages, this.props.wrapperMap, templateId)}>
-                            <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={t.id} secondary={t.v===null?'Unchanged':''}/>
+                             <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={t.id} secondary={t.v===null?'Unchanged':''}/>
+                             <CloudUploadIcon style={cloudIconStyle} onClick={()=>this.props.showImportDialog()}/>
                          </MenuItem>]
                     })}
                     </MenuList>
@@ -126,7 +130,6 @@ class VersionTable extends React.Component {
                     {
                         this.props.openContent ?
                             <div style={specifyContentPadding}>
-                                Import from drupal <CloudUploadIcon style={cloudIconStyle}/>
                                 <ul style={unorderedListStyle}>
                                     {this.props.languages && this.props.languages.map(l =>{
                                         let itemContent = this.props.templateApiInfo && this.props.templateApiInfo['anonymous'] && this.props.templateApiInfo['anonymous'][l];
@@ -138,7 +141,11 @@ class VersionTable extends React.Component {
                                         if (this.props.changed && this.props.changed['anonymous'] && this.props.changed['anonymous'].indexOf(l) !== -1) {
                                             isChanged = true
                                         }
-                                        return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('anonymous', l, this.props.wrapperMap, templateId)}><a style={anchorStyle} href="javascript:void(0)">{isChanged ? `*${l}`: l}</a></li>
+                                        let text = isChanged ? `*${l}`: l;
+                                        if (this.props.auth === 'anonymous' && this.props.locale === l) {
+                                            text = <b>{text}</b>;
+                                        }
+                                        return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('anonymous', l, this.props.wrapperMap, templateId)}><a style={anchorStyle} href="javascript:void(0)">{text}</a></li>
                                     })}
                                 </ul>
                                 <FormControlLabel control={<Checkbox checked={this.props.checkboxCheck === true ? true : false} onChange={()=>{this.props.changeCheckbox(this.props.checkboxCheck)}} value="checkedB"/>} label="More Content"/>
@@ -146,7 +153,6 @@ class VersionTable extends React.Component {
                                     this.props.checkboxCheck ?
                                         <div>
                                             <b>Customer Version</b><br />
-                                            Import from drupal <CloudUploadIcon style={cloudIconStyle}/>
                                             <ul style={unorderedListStyle}>
                                                 {this.props.languages && this.props.languages.map(l=>{
                                                     let itemContent = this.props.templateApiInfo && this.props.templateApiInfo['customer'] && this.props.templateApiInfo['customer'][l];
@@ -158,12 +164,15 @@ class VersionTable extends React.Component {
                                                     if (this.props.changed && this.props.changed['customer'] && this.props.changed['customer'].indexOf(l) !== -1) {
                                                         isChanged = true
                                                     }
-                                                    return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('customer', l, this.props.wrapperMap, templateId)}><a style={anchorStyle} href="javascript:void(0)">{isChanged ? `*${l}`: l}</a></li>
+                                                    let text = isChanged ? `*${l}`: l;
+                                                    if (this.props.auth === 'customer' && this.props.locale === l) {
+                                                        text = <b>{text}</b>;
+                                                    }
+                                                    return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('customer', l, this.props.wrapperMap, templateId)}><a style={anchorStyle} href="javascript:void(0)">{text}</a></li>
                                                 })}
                                             </ul>
 
                                             <b>Presenter Version</b><br />
-                                            Import from drupal <CloudUploadIcon style={cloudIconStyle}/>
                                             <ul style={unorderedListStyle}>
                                                 {this.props.languages && this.props.languages.map(l=>{
                                                     let itemContent = this.props.templateApiInfo && this.props.templateApiInfo['presenter'] && this.props.templateApiInfo['presenter'][l];
@@ -175,14 +184,18 @@ class VersionTable extends React.Component {
                                                     if (this.props.changed && this.props.changed['presenter'] && this.props.changed['presenter'].indexOf(l) !== -1) {
                                                         isChanged = true
                                                     }
-                                                    return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('presenter', l, this.props.wrapperMap, templateId)}><a style={anchorStyle} href="javascript:void(0)">{isChanged ? `*${l}`: l}</a></li>
+                                                    let text = isChanged ? `*${l}`: l;
+                                                    if (this.props.auth === 'presenter' && this.props.locale === l) {
+                                                        text = <b>{text}</b>;
+                                                    }
+                                                    return <li style={unorderedListItemPadding} onClick={()=>this.props.templateSelect('presenter', l, this.props.wrapperMap, templateId)}><a style={anchorStyle} href="javascript:void(0)">{text}</a></li>
                                                 })}
                                             </ul>
                                         </div>
                                         : false
 
                                 }
-                                <Button variant="contained" color="primary" disabled={!this.props.saveContentButton} className={classes.button} onClick={()=>this.props.saveContent(this.props.market, this.props.version.id, this.props.template.id, this.props.templateApiInfo)}>
+                                <Button variant="contained" color="primary" disabled={!disableSave} className={classes.button} onClick={()=>this.props.saveContent(this.props.market, this.props.version.id, this.props.template.id, this.props.templateApiInfo)}>
                                     Save Content
                                 </Button>
                             </div>
@@ -197,6 +210,7 @@ export default connect(state => ({
     auth: state.version.auth,
     checkboxCheck: state.version.checkboxCheck,
     changed: state.version.changed,
+    codeChanged: state.version.codeChanged,
     locale: state.version.locale,
     market: state.market.id,
     openContent: state.version.openContent || false,
@@ -240,5 +254,11 @@ export default connect(state => ({
     },
     saveContent: (market, version, template,  templateApiInfo)=>{
         dispatch(saveAllContent(market, version, template, templateApiInfo));
+    },
+    textAreaChanged: ()=>{
+        dispatch(textAreaChanged());
+    },
+    showImportDialog: () =>{
+        dispatch(showImportDialog());
     }
 }))(withStyles(styles)(VersionTable));

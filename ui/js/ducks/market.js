@@ -17,6 +17,7 @@ export const changeMarket = (market) => {
 
 //Known locales
 let locales = {
+	'glbl': ["en_US", "es_US"],
 	"us": ["en_US", "es_US"],
 	"ca": ["en_CA", "fr_CA"],
 	"au": ["en_AU"],
