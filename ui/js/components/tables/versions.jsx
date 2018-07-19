@@ -9,6 +9,7 @@ import MenuItem from '@material-ui/core/MenuItem';
 import Icon from '@material-ui/core/Icon';
 import IconButton from '@material-ui/core/IconButton';
 import CloudUploadIcon from '@material-ui/icons/CloudUpload';
+import Edit from '@material-ui/icons/Create'
 
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -32,10 +33,11 @@ import Toolbar from '@material-ui/core/Toolbar';
 
 import CreateVersion from './createVersionDialog.jsx';
 import ImportDrupal from './importDrupalDialog.jsx';
+import EditVersion from './editVersionDialog.jsx';
 
 import moment from 'moment';
 
-import {changeVersion, changeTemplate, createRelease, showDialog, showContentDialog, changeTemplateHtml, initialTemplate, saveAllContent, specifyContentCheckBox, textAreaChanged, showImportDialog} from '../../ducks/versions.js';
+import {changeVersion, changeTemplate, createRelease, showDialog, showContentDialog, showEditDialog, changeTemplateHtml, initialTemplate, saveAllContent, specifyContentCheckBox, textAreaChanged, showImportDialog} from '../../ducks/versions.js';
 
 import { withStyles } from '@material-ui/core/styles';
 const styles = theme => ({
@@ -68,11 +70,13 @@ class VersionTable extends React.Component {
         let specifyContentPadding = {paddingLeft: '12px'};
         let unorderedListItemPadding = {paddingBottom: '5px'};
         let anchorStyle = {textDecoration: 'none'};
-        let cloudIconStyle = {left: '5px', position: 'relative'};
+        let cloudIconStyle = {position: 'relative', left: '5px'};
+        let editIconStyle = {position: 'absolute', right: '5px', bottom: '10px'};
         $('#htmlTextArea').val(this.props.templateHTML);
         let templateId = this.props.template && this.props.template.id;
         let disableSave = (this.props.changed && Object.keys(this.props.changed).length !== 0) && this.props.saveContentButton;
-        
+
+
 		return [
             <div className="view" key="view">
                 <AppBar className="appBar" position="static">
@@ -95,37 +99,43 @@ class VersionTable extends React.Component {
                 }
             </div>,
             <div className="select" key="versions">
-                <div style={{overflow:'auto'}}>
+                <div style={{overflow:'auto', height: '90%'}}>
                     <h3>Choose a Release</h3>
                     <Button variant="contained" color="primary" className={classes.button} onClick={()=>this.props.showDialog()}>
                       Create a Release
-                    </Button>                
+                    </Button>
                     <CreateVersion></CreateVersion>
                     <ImportDrupal></ImportDrupal>
+                    <EditVersion></EditVersion>
                     <MenuList id="versionlist" component="div">
                      {this.props.versions && this.props.versions.map((v,i)=>{
                       let isSelected = v.id === this.props.version.id;
                          return [i==0?null:<Divider />,
                          <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.versionSelect(v, this.props.market)}>
-                            <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={moment(v.id).format('LLLL')} secondary={v.name}/>
+                             <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={moment(v.id).format('LLLL')} secondary={v.name}/>
+                             <Edit style={editIconStyle} onClick={()=>this.props.showEditDialog()}/>
                          </MenuItem>]
                     })}
                     </MenuList>
                 </div>
-                <div>
-                    <h3>Choose a Path</h3>
-                    <MenuList id="versionlist" component="div" >
-                     {this.props.templates && this.props.templates.map((t,i)=>{
-                         let isSelected = t.id === this.props.template.id && this.props.openContent;
-                         return [i==0?null:<Divider />,
-                         <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.initialTemplate(t, this.props.version,this.props.market, this.props.languages, this.props.wrapperMap, templateId)}>
-                             <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={t.id} secondary={t.v===null?'Unchanged':''}/>
-                             <CloudUploadIcon style={cloudIconStyle} onClick={()=>this.props.showImportDialog()}/>
-                         </MenuItem>]
-                    })}
-                    </MenuList>
-                </div>
-                <div className={"test"}>
+                { this.props.market !== 'GLBL' ?
+                    <div style={{overflow:'auto', height: '90%'}}>
+                        <h3>Choose a Path</h3>
+                        <MenuList id="versionlist" component="div" >
+                         {this.props.templates && this.props.templates.map((t,i)=>{
+                             let isSelected = t.id === this.props.template.id && this.props.openContent;
+                             return [i==0?null:<Divider />,
+                             <MenuItem button selected={isSelected} style={listItemOverrides} onClick={()=>this.props.initialTemplate(t, this.props.version,this.props.market, this.props.languages, this.props.wrapperMap, t.id)}>
+                                 <ListItemText  classes={{ primary: classes.primary, secondary: classes.primary }} primary={t.id} secondary={t.v===null?'Unchanged':''}/>
+                                 <CloudUploadIcon style={cloudIconStyle} onClick={()=>this.props.showImportDialog()}/>
+                             </MenuItem>]
+                        })}
+                        </MenuList>
+                    </div>
+                    : false
+                }
+                { this.props.market !== 'GLBL' ?
+                    <div className={"test"} style={{overflow:'auto', height: '90%'}}>
                     <h3>Specify Content</h3>
                     {
                         this.props.openContent ?
@@ -200,8 +210,9 @@ class VersionTable extends React.Component {
                                 </Button>
                             </div>
                             : false
-                    }
-                </div>
+                        }
+                    </div>
+                : false}
             </div>
 		];
 	}
@@ -245,6 +256,9 @@ export default connect(state => ({
     },
     showDialog: ()=>{
       dispatch(showDialog());
+    },
+    showEditDialog: ()=>{
+        dispatch(showEditDialog());
     },
     showContentDialog: ()=>{
       dispatch(showContentDialog());

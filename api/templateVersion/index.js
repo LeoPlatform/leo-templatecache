@@ -12,7 +12,8 @@ const siteWrapper = "templates/site_wrapper";
 
 //Known locales
 let locales = {
-	"us": ["en_US", "es_US"],
+    "glbl": ["en_US", "es_US", "en_CA", "fr_CA", "en_AU", "en_NZ", "en_UK", "es_MX", "en_MX", "de_DE", "en_DE", "fr_FR", "en_FR", "es_ES", "en_ES", "zh_HK", "en_HK", "it_IT", "en_IT", "en_IE"],
+    "us": ["en_US", "es_US"],
 	"ca": ["en_CA", "fr_CA"],
 	"au": ["en_AU"],
 	"nz": ["en_NZ"],

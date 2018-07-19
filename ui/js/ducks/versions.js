@@ -30,6 +30,11 @@ const HIDE_CONTENT_DIALOG = 'VERSIONS_HIDE_CONTENT_DIALOG';
 const SHOW_IMPORT_DIALOG = 'VERSIONS_SHOW_IMPORT_DIALOG';
 const HIDE_IMPORT_DIALOG = 'VERSIONS_HIDE_IMPORT_DIALOG';
 
+const SHOW_EDIT_DIALOG = 'SHOW_EDIT_DIALOG';
+const HIDE_EDIT_DIALOG = 'HIDE_EDIT_DIALOG';
+
+const EDIT_RELEASE = 'EDIT_RELEASE';
+
 const CHANGE_CHECKBOX = 'CHANGE_CHECKBOX';
 
 const TEXT_AREA_CHANGED = 'TEXT_AREA_CHANGED';
@@ -92,7 +97,7 @@ export const changeVersion = (v, market) => {
                 type: PICK_VERSION_SUCCESS,
                 data: results.one.data,
 				wrapperFiles: results.two.files,
-				wrapperMap: results.two.map
+				wrapperMap: results.two.map,
             });
         });
     }
@@ -115,6 +120,18 @@ export const createRelease = (timestamp, name, market) => {
 			});
 		});
 	}
+};
+
+export const editRelease = (edit, old, market, markets) => {
+    return dispatch => {
+        dispatch({
+            type: EDIT_RELEASE,
+            edit: edit,
+			old: old,
+			markets: markets
+        });
+        $.post(`api/version/${market}/${old.id}`, JSON.stringify(edit));
+    }
 };
 
 export const importFromDrupal = (url, customerUrl, presenterUrl, template) => {
@@ -252,6 +269,22 @@ export const hideDialog = () => {
 	};
 };
 
+export const showEditDialog = () => {
+    return dispatch => {
+        dispatch({
+            type: SHOW_EDIT_DIALOG
+        });
+    };
+};
+
+export const hideEditDialog = () => {
+    return dispatch => {
+        dispatch({
+            type: HIDE_EDIT_DIALOG
+        });
+    };
+};
+
 export const showContentDialog = () => {
 	return dispatch => {
 		dispatch({
@@ -310,7 +343,8 @@ export function reducer(state = {
 	templateHTML: '',
 	showDialog: false,
     showDrupalDialog: false,
-	showContentDialog: false
+	showContentDialog: false,
+    showEditDialog: false
 }, action) {
 	switch (action.type) {
 		case FETCH_SUCCESS:
@@ -326,8 +360,9 @@ export function reducer(state = {
 			openContent: false,
             wrapperFiles: '',
             wrapperMap: '',
-            wrapperMapValue: ''
-		});
+            wrapperMapValue: '',
+            wrappedHTML: ''
+        });
 		break;
 	case CLEAR:
 		return Object.assign({}, state, {
@@ -374,7 +409,7 @@ export function reducer(state = {
 	case PICK_TEMPLATE_SUCCESS:
 		let key = Object.keys(action.data.anonymous)[0];
 		let auth = Object.keys(action.data)[0];
-		let html = action.data.anonymous[key];
+		let html = action.data.anonymous[key] || 'No Content';
 		var valid = true;
 		if (action.checkboxCheck) {
 			Object.keys(action.data).map((key) => {
@@ -419,6 +454,15 @@ export function reducer(state = {
 			wrapperMapValue: action.wrapperMapValue
         });
 		break;
+	case EDIT_RELEASE:
+        let toDelete = new Set([action.old.id]);
+        let newList = state.list.filter(obj => !toDelete.has(obj.id));
+        let id = action.edit.id ? action.edit.id : action.old.id;
+        let updatedVersion = {id: id, name: action.edit.name, markets: action.markets};
+        return Object.assign({}, state, {
+            list: newList.concat(updatedVersion).sort((a,b) => a.id-b.id)
+        });
+		break;
 	case SHOW_DIALOG:
 		return Object.assign({}, state, {
 			showDialog: true
@@ -427,6 +471,16 @@ export function reducer(state = {
 	case HIDE_DIALOG:
 		return Object.assign({}, state, {
 			showDialog: false
+		});
+		break;
+	case SHOW_EDIT_DIALOG:
+		return Object.assign({}, state, {
+            showEditDialog: true
+		});
+		break;
+	case HIDE_EDIT_DIALOG:
+		return Object.assign({}, state, {
+			showEditDialog: false
 		});
 		break;
 	case SHOW_CONTENT_DIALOG:
