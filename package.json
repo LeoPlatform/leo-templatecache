@@ -21,8 +21,8 @@
 		"leo-auth": "^2.0.0",
 		"leo-config": "^1.0.2",
 		"lodash.union": "^4.6.0",
-		"react": "^16.4.0",
-		"react-dom": "^16.4.0",
+		"react": "^16.14.0",
+		"react-dom": "^16.14.0",
 		"source-map-support": "^0.5.6"
 	}
 }
